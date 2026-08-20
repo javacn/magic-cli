@@ -45,6 +45,7 @@
 | magic-video | 🚧 开发中 | 视频内容处理 CLI | 即将推出 |
 | magic-ppt | 🚧 规划中 | 演示文稿生成 CLI | 敬请期待 |
 | magic-test | 🚧 规划中 | 自动化测试 CLI | 敬请期待 |
+| magic-canvas | 🚧 规划中 | 无限画布 CLI | 敬请期待 |
 | magic-game | 🚧 规划中 | 小游戏生成 CLI | 敬请期待 |
 
 ---
@@ -234,6 +235,7 @@ magic-wiki config unset raw_dir   # 恢复默认保存目录（~/.magic-wiki/wik
 - [ ] magic-video —— 视频内容处理 CLI（开发中）
 - [ ] magic-ppt —— 演示文稿生成 CLI（规划中）
 - [ ] magic-test —— 自动化测试 CLI（规划中）
+- [ ] magic-canvas —— 无限画布 CLI（规划中）
 - [ ] magic-game —— 小游戏生成 CLI（规划中）
 
 ## 费用
