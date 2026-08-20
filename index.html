@@ -1150,9 +1150,19 @@ document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el
   var N=tools.length,base=[],A=0,target=null,paused=false,running=true;
   var detailEl=document.getElementById('orbitDetail');
   var DEG=Math.PI/180;
-  var R_MAIN=3.0,R_MID=1.98,R_FAR=4.08;
+  // 每颗行星：轨道半径 / 球体尺寸 / 表面纹理 / 自转速度 / 专属特征
+  var SPEC=[
+    {radius:2.42,size:.5, kind:'wave',   spin:.004, feature:'ring'},
+    {radius:3.08,size:.4, kind:'stripe', spin:.008, feature:'moon'},
+    {radius:2.72,size:.4, kind:'speck',  spin:.006, feature:null},
+    {radius:3.32,size:.45,kind:'circuit',spin:.01,  feature:'shell'},
+    {radius:2.92,size:.44,kind:'grid',   spin:.005, feature:null},
+    {radius:2.57,size:.36,kind:'pixel',  spin:.012, feature:null},
+    {radius:3.17,size:.37,kind:'dots',   spin:.007, feature:'shards'}
+  ];
   var renderer,scene,camera,root,sun,sunRing,planets=[],meshes=[];
   var raycaster=new THREE.Raycaster(),nDC={x:0,y:0},hovered=null;
+  var tmpV=new THREE.Vector3(),swayT=0;
 
   try{
     renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
@@ -1179,20 +1189,10 @@ document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el
   root=new THREE.Group();
   scene.add(root);
 
-  // ── 轨道环 ──
+  // ── 轨道环工具 ──
   function ringPts(r,n){var p=[];for(var i=0;i<n;i++){var a=i/n*Math.PI*2;p.push(new THREE.Vector3(Math.sin(a)*r,0,Math.cos(a)*r));}return p;}
-  function addRing(r,color,opacity,dash){
-    var geo=new THREE.BufferGeometry().setFromPoints(ringPts(r,160));
-    var mat=dash
-      ?new THREE.LineDashedMaterial({color:color,transparent:true,opacity:opacity,dashSize:.14,gapSize:.1})
-      :new THREE.LineBasicMaterial({color:color,transparent:true,opacity:opacity});
-    var line=new THREE.LineLoop(geo,mat);
-    if(dash)line.computeLineDistances();
-    root.add(line);
-  }
-  addRing(R_MAIN,0x78aaff,.4,false);
-  addRing(R_MID,0x78aaff,.18,true);
-  addRing(R_FAR,0x2ee6c8,.14,false);
+  function hex2rgb(h){var n=parseInt(h.slice(1),16);return [n>>16&255,n>>8&255,n&255];}
+  function shade(hex,f){var c=hex2rgb(hex);return 'rgb('+Math.round(c[0]*f)+','+Math.round(c[1]*f)+','+Math.round(c[2]*f)+')';}
 
   // ── 发光贴图工具 ──
   function glowTexture(inner,outer){
@@ -1232,15 +1232,78 @@ document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el
   sunRing.computeLineDistances();
   root.add(sunRing);
 
+  // ── 行星表面纹理（每种工具一种图案） ──
+  function planetTexture(kind,hex){
+    var c=document.createElement('canvas');c.width=c.height=256;
+    var g=c.getContext('2d');
+    var base=shade(hex,.16),main=shade(hex,.95),hi='rgba(255,255,255,.22)';
+    g.fillStyle=base;g.fillRect(0,0,256,256);
+    switch(kind){
+      case 'wave': // wiki：波纹
+        var gr=g.createRadialGradient(128,128,10,128,128,150);
+        gr.addColorStop(0,shade(hex,.85));gr.addColorStop(1,base);
+        g.fillStyle=gr;g.fillRect(0,0,256,256);
+        g.strokeStyle=hi;g.lineWidth=5;
+        for(var i=0;i<5;i++){g.beginPath();g.arc(128,128,28+i*24,0,7);g.stroke();}
+        g.strokeStyle='rgba(255,255,255,.12)';g.lineWidth=3;
+        for(i=0;i<5;i++){g.beginPath();g.arc(128,128,18+i*24,0,7);g.stroke();}
+        break;
+      case 'stripe': // video：条纹
+        for(var i=0;i<11;i++){g.fillStyle=i%2?main:base;g.fillRect(0,i*24,256,24);}
+        for(i=0;i<40;i++){g.fillStyle='rgba(255,255,255,'+(0.03+Math.random()*0.08)+')';
+          g.fillRect(Math.random()*256,Math.random()*256,3,3);}
+        break;
+      case 'speck': // ppt：斑点
+        g.fillStyle=shade(hex,.5);g.fillRect(0,0,256,256);
+        for(var i=0;i<46;i++){g.fillStyle='rgba(255,255,255,'+(0.05+Math.random()*0.18)+')';
+          g.beginPath();g.arc(Math.random()*256,Math.random()*256,3+Math.random()*15,0,7);g.fill();}
+        g.fillStyle=hi;
+        for(i=0;i<6;i++){g.beginPath();g.arc(90+Math.random()*76,90+Math.random()*76,10+Math.random()*20,0,7);g.fill();}
+        break;
+      case 'circuit': // test：电路网格
+        g.strokeStyle=main;g.lineWidth=2.5;
+        for(var x=0;x<=256;x+=32){g.beginPath();g.moveTo(x,0);g.lineTo(x,256);g.stroke();
+          g.beginPath();g.moveTo(0,x);g.lineTo(256,x);g.stroke();}
+        g.fillStyle=hi;
+        for(x=16;x<=256;x+=32)for(var y=16;y<=256;y+=32){g.fillRect(x-3.5,y-3.5,7,7);}
+        break;
+      case 'grid': // canvas：粗网格
+        g.fillStyle=shade(hex,.4);g.fillRect(0,0,256,256);
+        g.strokeStyle=main;g.lineWidth=4;
+        for(var x=0;x<=256;x+=32){g.beginPath();g.moveTo(x,0);g.lineTo(x,256);g.stroke();}
+        for(var y=0;y<=256;y+=32){g.beginPath();g.moveTo(0,y);g.lineTo(256,y);g.stroke();}
+        g.strokeStyle='rgba(255,255,255,.35)';g.lineWidth=1;
+        for(x=16;x<=256;x+=32){g.beginPath();g.moveTo(x,0);g.lineTo(x,256);g.stroke();
+          g.beginPath();g.moveTo(0,x);g.lineTo(256,x);g.stroke();}
+        break;
+      case 'pixel': // game：像素块
+        g.fillStyle=main;g.fillRect(0,0,256,256);
+        for(var i=0;i<70;i++){g.fillStyle=Math.random()<.5?'rgba(0,0,0,.2)':'rgba(255,255,255,.14)';
+          g.fillRect(Math.floor(Math.random()*16)*16,Math.floor(Math.random()*16)*16,16,16);}
+        break;
+      case 'dots': // matrix：点阵
+        g.fillStyle=shade(hex,.3);g.fillRect(0,0,256,256);
+        g.fillStyle=main;
+        for(var x=0;x<=256;x+=21.3)for(var y=0;y<=256;y+=21.3){g.fillRect(x-2.5,y-2.5,5,5);}
+        g.fillStyle=hi;
+        for(x=10.6;x<=256;x+=21.3)for(var y=10.6;y<=256;y+=21.3){g.fillRect(x-1.2,y-1.2,2.4,2.4);}
+        break;
+    }
+    return new THREE.CanvasTexture(c);
+  }
+
   // ── 行星 ──
   tools.forEach(function(t,i){
     base[i]=i*360/N;
+    var sp=SPEC[i];
     var grp=new THREE.Group();
     var col=new THREE.Color(t.acc);
+    var tex=planetTexture(sp.kind,t.acc);
     var mesh=new THREE.Mesh(
-      new THREE.SphereGeometry(.42,36,36),
+      new THREE.SphereGeometry(sp.size,40,40),
       new THREE.MeshStandardMaterial({
-        color:col,emissive:col,emissiveIntensity:.45,metalness:.25,roughness:.42
+        map:tex,emissive:new THREE.Color(0xffffff),emissiveMap:tex,
+        emissiveIntensity:.5,metalness:.18,roughness:.42
       })
     );
     mesh.userData.index=i;
@@ -1249,24 +1312,87 @@ document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el
       map:glowTexture(t.acc+'cc',t.dim),
       transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:.95
     }));
-    halo.scale.set(2.2,2.2,1);
+    halo.scale.set(5.4*sp.size,5.4*sp.size,1);
     grp.add(halo);
     var label=new THREE.Sprite(new THREE.SpriteMaterial({
       map:labelTexture('magic-'+t.short,t.acc),
       transparent:true,depthWrite:false
     }));
-    label.position.y=1.12;label.scale.set(1.9,.52,1);
+    label.position.y=sp.size*2.2+.2;label.scale.set(1.9,.52,1);
     grp.add(label);
+    // 专属特征
+    var anim={};
+    if(sp.feature==='ring'){ // wiki：行星环
+      var ring=new THREE.Mesh(
+        new THREE.RingGeometry(sp.size*1.55,sp.size*2.15,64),
+        new THREE.MeshBasicMaterial({color:t.acc,transparent:true,opacity:.5,side:THREE.DoubleSide,depthWrite:false})
+      );
+      ring.rotation.x=Math.PI/2.35;
+      grp.add(ring);
+    }else if(sp.feature==='moon'){ // video：卫星
+      var moonG=new THREE.Group();
+      moonG.position.set(sp.size*1.9,0,0);
+      moonG.add(new THREE.Mesh(
+        new THREE.SphereGeometry(sp.size*.26,16,16),
+        new THREE.MeshStandardMaterial({color:0xcfc4ff,emissive:0x7c6cff,emissiveIntensity:.55})
+      ));
+      grp.add(moonG);anim.moonG=moonG;
+    }else if(sp.feature==='shell'){ // test：防护罩
+      var shell=new THREE.Mesh(
+        new THREE.SphereGeometry(sp.size*1.55,18,10),
+        new THREE.MeshBasicMaterial({color:t.acc,wireframe:true,transparent:true,opacity:.3})
+      );
+      grp.add(shell);anim.shell=shell;
+    }else if(sp.feature==='shards'){ // matrix：碎片环绕
+      var shards=[];
+      for(var k=0;k<5;k++){
+        var sg=new THREE.Group();
+        sg.add(new THREE.Mesh(
+          new THREE.BoxGeometry(sp.size*.22,sp.size*.22,sp.size*.22),
+          new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:.6})
+        ));
+        sg.position.set(Math.cos(k*2.513)*sp.size*2.1,Math.sin(k*1.7)*sp.size*.95,Math.sin(k*2.513)*sp.size*2.1);
+        grp.add(sg);shards.push(sg);
+      }
+      anim.shards=shards;
+    }
+    // 每颗行星自己的轨道环
+    var oline=new THREE.LineLoop(
+      new THREE.BufferGeometry().setFromPoints(ringPts(sp.radius,128)),
+      new THREE.LineBasicMaterial({color:col,transparent:true,opacity:.16})
+    );
+    root.add(oline);
     root.add(grp);
-    planets.push(grp);
+    planets.push({grp:grp,mesh:mesh,halo:halo,label:label,radius:sp.radius,size:sp.size,spin:sp.spin,anim:anim});
     meshes.push(mesh);
   });
   meshes.push(sun);
 
   function positionPlanets(){
-    planets.forEach(function(grp,i){
+    planets.forEach(function(p,i){
       var a=(base[i]+A)*DEG;
-      grp.position.set(Math.sin(a)*R_MAIN,Math.sin(i*2.4)*.18,Math.cos(a)*R_MAIN);
+      p.grp.position.set(Math.sin(a)*p.radius,Math.sin(i*2.4)*.18,Math.cos(a)*p.radius);
+    });
+  }
+  // 深度因子：近处行星放大变亮，远处缩小变暗（增强远近感）
+  function depthNormal(p){
+    p.grp.getWorldPosition(tmpV);
+    var zmax=3.32*root.scale.x;
+    return Math.max(.7,Math.min(1.3,1-0.16*(tmpV.z/zmax)));
+  }
+  function updatePlanets(){
+    planets.forEach(function(p){
+      var n=depthNormal(p);
+      var hv=hovered===p.mesh;
+      p.mesh.scale.setScalar(p.size*n*(hv?1.16:1));
+      p.mesh.material.emissiveIntensity=Math.max(.22,.5*n)+(hv?.35:0);
+      p.halo.scale.setScalar(5.4*p.size*n);
+      p.label.material.opacity=Math.min(1,.3+.62*n);
+      p.mesh.rotation.y+=p.spin*n;
+      var an=p.anim;
+      if(an.moonG)an.moonG.rotation.y+=.05;
+      if(an.shell)an.shell.rotation.y+=.012;
+      if(an.shards)an.shards.forEach(function(sg){sg.rotation.y+=.05;sg.rotation.x+=.03;});
     });
   }
   function resize(){
@@ -1290,10 +1416,7 @@ document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el
   renderer.domElement.addEventListener('pointermove',function(ev){
     var hits=pick(ev),h=hits.length?hits[0].object:null;
     if(h===sun)h=null;
-    if(h===hovered)return;
-    if(hovered){hovered.scale.setScalar(1);hovered.material.emissiveIntensity=.45;}
     hovered=h;
-    if(hovered){hovered.scale.setScalar(1.16);hovered.material.emissiveIntensity=.9;}
     stage.style.cursor=hovered?'pointer':'';
   });
   renderer.domElement.addEventListener('click',function(ev){
@@ -1334,9 +1457,23 @@ document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el
     getA:function(){return A;},
     isPaused:function(){return paused;},
     screenPos:function(i){
-      var v=new THREE.Vector3().copy(planets[i].position).applyMatrix4(root.matrixWorld).project(camera);
+      var v=new THREE.Vector3().copy(planets[i].grp.position).applyMatrix4(root.matrixWorld).project(camera);
       var r=renderer.domElement.getBoundingClientRect();
       return {x:r.left+(v.x+1)/2*r.width,y:r.top+(1-v.y)/2*r.height};
+    },
+    depthFactor:function(i){return planets[i].mesh.scale.x/planets[i].size;},
+    texCount:function(){return planets.filter(function(p){return p.mesh.material.map;}).length;},
+    spinY:function(i){return planets[i].mesh.rotation.y;},
+    featureStats:function(){
+      var s={ring:0,moon:0,shell:0,shards:0};
+      planets.forEach(function(p){
+        if(p.anim.moonG)s.moon++;
+        if(p.anim.shell)s.shell++;
+        if(p.anim.shards)s.shards++;
+      });
+      // ring 特征没有动画对象，直接数 SPEC
+      if(SPEC[0].feature==='ring')s.ring=1;
+      return s;
     }
   };
 
@@ -1349,7 +1486,12 @@ document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el
     }else if(!paused&&!reduced){
       A=(A+0.14)%360;
     }
+    // 相机缓慢摆动，制造视差，增强立体感
+    swayT+=1;
+    camera.position.set(Math.sin(swayT*.0035)*.9,4.2,6.2+Math.cos(swayT*.0035)*.25);
+    camera.lookAt(0,0,0);
     positionPlanets();
+    updatePlanets();
     sun.rotation.y+=.004;
     sunRing.rotation.y-=.008;
     renderer.render(scene,camera);
