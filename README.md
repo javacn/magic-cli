@@ -42,7 +42,10 @@
 | 工具 | 状态 | 说明 | 安装 |
 |------|------|------|------|
 | [magic-wiki](#magic-wiki) | ✅ 已发布 v1.0.3 | 网页剪藏 / 搜索 B 站 + 公众号 / 队列管理 | `npm install -g @magicstock/magic-wiki` |
-| magic-video | 🚧 开发中 | 视频内容处理 CLI（敬请期待） | 即将推出 |
+| magic-video | 🚧 开发中 | 视频内容处理 CLI | 即将推出 |
+| magic-ppt | 🚧 规划中 | 演示文稿生成 CLI | 敬请期待 |
+| magic-test | 🚧 规划中 | 自动化测试 CLI | 敬请期待 |
+| magic-game | 🚧 规划中 | 小游戏生成 CLI | 敬请期待 |
 
 ---
 
@@ -229,6 +232,9 @@ magic-wiki config unset raw_dir   # 恢复默认保存目录（~/.magic-wiki/wik
 
 - [x] magic-wiki —— 网页剪藏 / 搜索 / 队列管理
 - [ ] magic-video —— 视频内容处理 CLI（开发中）
+- [ ] magic-ppt —— 演示文稿生成 CLI（规划中）
+- [ ] magic-test —— 自动化测试 CLI（规划中）
+- [ ] magic-game —— 小游戏生成 CLI（规划中）
 
 ## 费用
 
