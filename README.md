@@ -272,8 +272,8 @@ magic-wiki config unset raw_dir   # 删除配置项
 - **视频分镜（video）**：`storyboard generate` 把剧本全文拆成导演可用分镜台本（中文台本 + 英文图像 prompt），注入癫爽硬约束与 12 铁律镜头设计，支持首尾帧 / 全拆 / 关键镜头模式
 - **风格与模型注入**：内置 11 个美术风格预设（国风 / 3D 国潮 / 真人都市等）、题材叙事卡与 Seedance 2.0 / 镜头设计技能包（含多语言词表）、5 个视频模型 prompt（Seedance 2 多参数 / 短剧短提示 / 首尾帧 / Wan 2.6 单图首帧等），按项目 `art_style` 自动装配
 - **飞书实时进度卡**：批量生成时推送飞书卡片，折叠面板实时展示大纲 / 章节生成 / 全局校审 / 全局精修各阶段进度
-- **用量成本透明**：`magic-cli cost` 按 stage 聚合 LLM 调用次数、token 与人民币成本（内置模型定价表），日志存 `~/.magic-video/usage_log.json`
-- **15 项健康检查**：`magic-cli doctor` 一键体检 Go 环境、配置、LLM 凭据、prompts、技能包与内置资源，`--json` 输出对 CI 友好
+- **用量成本透明**：`magic-video cost` 按 stage 聚合 LLM 调用次数、token 与人民币成本（内置模型定价表），日志存 `~/.magic-video/usage_log.json`
+- **15 项健康检查**：`magic-video doctor` 一键体检 Go 环境、配置、LLM 凭据、prompts、技能包与内置资源，`--json` 输出对 CI 友好
 
 ### 安装
 
@@ -296,7 +296,7 @@ npm install -g @magicstock/magic-cli
 
 npm 安装即用，**无需 GitHub token、无需额外下载**；GitHub Releases 下载仅作为安装包缺失时的兜底（私有仓库需 `GITHUB_TOKEN`，含 sha256 校验）。
 
-> 若安装后 `magic-cli` 提示 binary not found，说明 postinstall 被 npm `allow-scripts` 拦截，执行：
+> 若安装后 `magic-video` 提示 binary not found，说明 postinstall 被 npm `allow-scripts` 拦截，执行：
 > ```bash
 > npm approve-scripts @magicstock/magic-cli
 > node "$(npm root -g)/@magicstock/magic-cli/scripts/install.js"
@@ -307,10 +307,10 @@ npm 安装即用，**无需 GitHub token、无需额外下载**；GitHub Release
 配置统一保存在用户级文件 `~/.magic-video/config.json`（首次运行任一命令时自动创建，旧版 `~/.magic-cli` 会自动迁移数据）。
 
 ```bash
-magic-cli config init            # 创建最小可用 config.json
-magic-cli config bind openclaw   # 从 ~/.openclaw/openclaw.json 同步模型供应商
-magic-cli config status          # 查看当前配置模式与同步状态
-magic-cli config show            # 显示当前配置
+magic-video config init            # 创建最小可用 config.json
+magic-video config bind openclaw   # 从 ~/.openclaw/openclaw.json 同步模型供应商
+magic-video config status          # 查看当前配置模式与同步状态
+magic-video config show            # 显示当前配置
 ```
 
 LLM 通过 OpenAI 兼容 API 调用（minimax / papergames 等多供应商），主模型失败自动沿 fallback 链切换备选（429 / 超时自动熔断与冷却）；`config bind openclaw` 后可直接复用本机 OpenClaw 的模型配置，无需重复填写 API Key。
@@ -319,59 +319,59 @@ LLM 通过 OpenAI 兼容 API 调用（minimax / papergames 等多供应商），
 
 ```bash
 # 环境体检
-magic-cli doctor
+magic-video doctor
 
 # ① 小说：一键开大纲 → 完整生成单章 → 批量生成整本
-magic-cli novel +new --project 凡人末日传 --genre 科幻末世 --premise "重生回末日前7天"
-magic-cli novel chapter generate --project 凡人末日传 --chapter ch-001
-magic-cli novel batch generate --project 凡人末日传
+magic-video novel +new --project 凡人末日传 --genre 科幻末世 --premise "重生回末日前7天"
+magic-video novel chapter generate --project 凡人末日传 --chapter ch-001
+magic-video novel batch generate --project 凡人末日传
 
 # 短篇单稿 + 作家风格蒸馏
-magic-cli novel short --project 凡人末日传 --genre 沙雕脑洞 --prompt "末日囤泡面"
-magic-cli novel style distill --author 猫腻 --work 择天记
+magic-video novel short --project 凡人末日传 --genre 沙雕脑洞 --prompt "末日囤泡面"
+magic-video novel style distill --author 猫腻 --work 择天记
 
 # ② 短剧剧本：开项目 → 单集生成 → 多轮改良
-magic-cli script +new --project 凡人末日传 --title "凡躯觉醒(第1集)" --roles "主持人,IT君"
-magic-cli script episode generate --project 凡人末日传 --episode episode_001
-magic-cli script episode improve --project 凡人末日传 --episode episode_001 --max-rounds 3
+magic-video script +new --project 凡人末日传 --title "凡躯觉醒(第1集)" --roles "主持人,IT君"
+magic-video script episode generate --project 凡人末日传 --episode episode_001
+magic-video script episode improve --project 凡人末日传 --episode episode_001 --max-rounds 3
 
 # ③ 视频分镜：把剧本拆成导演台本
-magic-cli video storyboard generate --project 凡人末日传 --episode episode_001 \
+magic-video video storyboard generate --project 凡人末日传 --episode episode_001 \
   --mode first_last_frame --style 2D_chinese_guofeng
 
 # 项目管理与成本
-magic-cli projects list
-magic-cli cost
+magic-video projects list
+magic-video cost
 ```
 
 ### 子命令一览
 
 | 命令 | 功能 |
 |------|------|
-| `magic-cli novel +new` | 一键开新大纲（智能默认 50 章 / 3 卷） |
-| `magic-cli novel outline generate` | 生成顶层大纲 |
-| `magic-cli novel chapter plan` | 生成 Beat Sheet |
-| `magic-cli novel chapter write` | 写单章（2500-4000 字） |
-| `magic-cli novel chapter review` | 独立质检（本地校验 + 节拍 + 6 维 LLM 评分） |
-| `magic-cli novel chapter revise` | 按 review.json 问题清单修订章节 |
-| `magic-cli novel chapter generate` | 完整生成单章（plan+write+review+revise） |
-| `magic-cli novel chapter autorevise` | 自动精修循环（写手 vs 评审多轮对抗） |
-| `magic-cli novel chapter cross-review` | 跨章节连续性检查（全本） |
-| `magic-cli novel chapter global-refine` | 基于校审报告做最小化精修 |
-| `magic-cli novel batch generate` | 批量生成所有章节 |
-| `magic-cli novel short` | 短篇单稿（1200-2000 字一次性） |
-| `magic-cli novel to_script convert` | 小说章节 → 短剧剧本适配 |
-| `magic-cli novel style <action>` | 作家风格指纹蒸馏与管理（distill/list/show/set） |
-| `magic-cli script +new` | 开新短剧项目（创建 project_spec.json） |
-| `magic-cli script episode generate` | 单集剧本生成（60-90 秒/集） |
-| `magic-cli script episode improve` | 多轮改良剧本 |
-| `magic-cli video storyboard generate` | 完整分镜生成（中文导演台本 + 英文图像 prompt） |
-| `magic-cli doctor` | 15 项环境健康检查（`--json` 输出 CI 友好） |
-| `magic-cli config <action>` | 配置管理（init/show/bind/unbind/status） |
-| `magic-cli projects <action>` | 项目管理（list/info/rm） |
-| `magic-cli cost` | LLM 用量与成本聚合（按 stage 分组） |
-| `magic-cli skills list` | 查看内置 AI Agent Skills 注册表 |
-| `magic-cli feishu <action>` | 飞书应用绑定 / OAuth 登录 / 进度卡片 |
+| `magic-video novel +new` | 一键开新大纲（智能默认 50 章 / 3 卷） |
+| `magic-video novel outline generate` | 生成顶层大纲 |
+| `magic-video novel chapter plan` | 生成 Beat Sheet |
+| `magic-video novel chapter write` | 写单章（2500-4000 字） |
+| `magic-video novel chapter review` | 独立质检（本地校验 + 节拍 + 6 维 LLM 评分） |
+| `magic-video novel chapter revise` | 按 review.json 问题清单修订章节 |
+| `magic-video novel chapter generate` | 完整生成单章（plan+write+review+revise） |
+| `magic-video novel chapter autorevise` | 自动精修循环（写手 vs 评审多轮对抗） |
+| `magic-video novel chapter cross-review` | 跨章节连续性检查（全本） |
+| `magic-video novel chapter global-refine` | 基于校审报告做最小化精修 |
+| `magic-video novel batch generate` | 批量生成所有章节 |
+| `magic-video novel short` | 短篇单稿（1200-2000 字一次性） |
+| `magic-video novel to_script convert` | 小说章节 → 短剧剧本适配 |
+| `magic-video novel style <action>` | 作家风格指纹蒸馏与管理（distill/list/show/set） |
+| `magic-video script +new` | 开新短剧项目（创建 project_spec.json） |
+| `magic-video script episode generate` | 单集剧本生成（60-90 秒/集） |
+| `magic-video script episode improve` | 多轮改良剧本 |
+| `magic-video video storyboard generate` | 完整分镜生成（中文导演台本 + 英文图像 prompt） |
+| `magic-video doctor` | 15 项环境健康检查（`--json` 输出 CI 友好） |
+| `magic-video config <action>` | 配置管理（init/show/bind/unbind/status） |
+| `magic-video projects <action>` | 项目管理（list/info/rm） |
+| `magic-video cost` | LLM 用量与成本聚合（按 stage 分组） |
+| `magic-video skills list` | 查看内置 AI Agent Skills 注册表 |
+| `magic-video feishu <action>` | 飞书应用绑定 / OAuth 登录 / 进度卡片 |
 
 ### 相关链接
 
