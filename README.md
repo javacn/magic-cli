@@ -16,8 +16,8 @@
 1. 安装：执行 npm install -g @magicstock/magic-wiki（国内网络慢时追加 --registry=https://registry.npmmirror.com）
 2. 验证：执行 magic-wiki --version，确认输出版本号
 3. 查看配置：执行 magic-wiki config path，确认配置文件位置（默认 ~/.magic-wiki/config.json）
-4. 配置飞书凭证（用于剪藏到飞书、搜索发送汇总卡片；用户不需要飞书则跳过）：
-   - 推荐：运行 magic-wiki init，按交互式向导填写 App ID / App Secret 等
+4. 配置模型与飞书凭证（模型必填；飞书用于剪藏到飞书、搜索发送汇总卡片，用户不需要飞书则跳过）：
+   - 推荐：运行 magic-wiki init，先按向导填写默认模型 / API 地址 / API Key（必填），再填飞书 App ID / App Secret 等（可选）
    - 或手动：magic-wiki config set feishu.app_id "<用户的飞书应用 APP ID>"，magic-wiki config set feishu.app_secret "<用户的飞书应用 APP SECRET>"
 5. 可选配置（按用户需要执行）：
    - magic-wiki config set feishu.wiki_node "<知识库节点 token>"        # 保存到飞书知识库
@@ -98,7 +98,7 @@ npm install -g @magicstock/magic-wiki
 
 **第 1 步：运行初始化向导（推荐）**
 
-`magic-wiki init` 是 v1.0.4 新增的交互式配置向导，引导你依次填写飞书凭证、笔记保存根目录与通知目标，直接回车表示保留当前值 / 跳过：
+`magic-wiki init` 是 v1.0.4 新增的交互式配置向导，先引导你填写**模型配置（必填，所有 AI 功能依赖）**，再依次是飞书凭证、笔记保存根目录与通知目标（可选）。必填项不能留空，可选项直接回车表示保留当前值 / 使用默认 / 跳过：
 
 ```bash
 magic-wiki init
@@ -119,8 +119,7 @@ magic-wiki config path
 
 magic-wiki 的笔记生成、视频 / 文章分析、视觉理解等 AI 能力，都通过
 **OpenAI 兼容 API** 调用大模型完成，因此必须先配置模型供应商 `llm.providers`。
-
-直接用 `config set` 写入默认模型与备选链：
+运行 `magic-wiki init` 时模型即为必填项；也可以直接用 `config set` 写入默认模型与备选链：
 
 ```bash
 magic-wiki config set llm.default_model "minimax/MiniMax-M3"
