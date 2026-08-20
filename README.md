@@ -13,7 +13,7 @@
 你是一名终端助手。请在用户电脑上安装并配置 magic-wiki（magic-cli 系列的命令行工具，用于网页剪藏、B 站 + 公众号搜索与队列管理）。
 
 步骤：
-1. 安装：执行 npm install -g @magicstock/magic-wiki
+1. 安装：执行 npm install -g @magicstock/magic-wiki（国内网络慢时追加 --registry=https://registry.npmmirror.com）
 2. 验证：执行 magic-wiki --version，确认输出版本号
 3. 查看配置：执行 magic-wiki config path，确认配置文件位置（默认 ~/.magic-wiki/config.json）
 4. 配置飞书凭证（用于剪藏到飞书、搜索发送汇总卡片；用户不需要飞书则跳过）：
@@ -70,6 +70,17 @@
 ### 安装
 
 ```bash
+npm install -g @magicstock/magic-wiki
+```
+
+国内用户下载较慢时，建议使用 npmmirror（原淘宝镜像）加速：
+
+```bash
+# 方式一：临时指定镜像源（仅本次安装生效）
+npm install -g @magicstock/magic-wiki --registry=https://registry.npmmirror.com
+
+# 方式二：永久切换 npm 镜像源（全局生效，推荐）
+npm config set registry https://registry.npmmirror.com
 npm install -g @magicstock/magic-wiki
 ```
 
