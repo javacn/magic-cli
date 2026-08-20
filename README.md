@@ -47,6 +47,7 @@
 | magic-test | 🚧 规划中 | 自动化测试 CLI | 敬请期待 |
 | magic-canvas | 🚧 规划中 | 无限画布 CLI | 敬请期待 |
 | magic-game | 🚧 规划中 | 小游戏生成 CLI | 敬请期待 |
+| magic-matrix | 🚧 规划中 | 短视频矩阵分发工具 | 敬请期待 |
 
 ---
 
@@ -237,6 +238,7 @@ magic-wiki config unset raw_dir   # 恢复默认保存目录（~/.magic-wiki/wik
 - [ ] magic-test —— 自动化测试 CLI（规划中）
 - [ ] magic-canvas —— 无限画布 CLI（规划中）
 - [ ] magic-game —— 小游戏生成 CLI（规划中）
+- [ ] magic-matrix —— 短视频矩阵分发工具（规划中）
 
 ## 费用
 
