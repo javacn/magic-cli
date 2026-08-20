@@ -293,42 +293,13 @@ section.block{padding:70px 0;border-top:1px solid var(--line)}
 .suite-card:hover .suite-go::after{content:"→";animation:nudge 1s ease-in-out infinite}
 @keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
 
-/* ── 3D 轨道指挥中心（环绕运行 · 点击聚焦 · 点击后停止旋转） ── */
+/* ── 3D 轨道指挥中心（Three.js 太阳系 · 公转 · 点击行星聚焦后停止） ── */
 .orbit-stage{
-  position:relative;height:560px;perspective:1300px;perspective-origin:50% 42%;
+  position:relative;height:560px;
   display:flex;align-items:center;justify-content:center;overflow:hidden;
 }
-.orbit-3d{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d}
-.orbit-core{
-  position:absolute;left:0;top:0;width:150px;height:150px;margin:-75px 0 0 -75px;
-  border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-  background:radial-gradient(circle at 35% 30%,rgba(46,230,200,.28),rgba(8,16,32,.95) 72%);
-  border:1px solid var(--line-strong);
-  box-shadow:0 0 46px rgba(46,230,200,.28),inset 0 0 34px rgba(46,230,200,.14);
-  z-index:3;cursor:pointer;text-align:center;transition:box-shadow .3s;
-}
-.orbit-core:hover{box-shadow:0 0 70px rgba(46,230,200,.45),inset 0 0 34px rgba(46,230,200,.2)}
-.oc-ring{position:absolute;inset:-14px;border-radius:50%;border:1px dashed rgba(46,230,200,.35);animation:spin 18s linear infinite}
-.oc-name{font-family:var(--disp);font-weight:700;font-size:20px;letter-spacing:.5px}
-.oc-name b{color:var(--cyan)}
-.oc-sub{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase}
-.orbit-sat{
-  position:absolute;left:0;top:0;width:168px;height:168px;margin:-84px 0 0 -84px;
-  transform-style:preserve-3d;cursor:pointer;user-select:none;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
-  border-radius:16px;background:linear-gradient(165deg,rgba(18,28,46,.94),rgba(10,16,28,.96));
-  border:1px solid var(--line);transition:border-color .3s,box-shadow .3s,opacity .3s;
-  --acc:var(--cyan);--acc-dim:rgba(46,230,200,.14);
-}
-.orbit-sat .os-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;
-  background:var(--acc-dim);border:1px solid rgba(120,170,255,.3);box-shadow:0 0 20px var(--acc-dim),inset 0 0 12px var(--acc-dim)}
-.orbit-sat .os-icon svg{width:23px;height:23px;stroke:var(--acc);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.orbit-sat .os-name{font-family:var(--disp);font-weight:700;font-size:15px;letter-spacing:.3px}
-.orbit-sat .os-name b{color:var(--acc)}
-.orbit-sat .os-lamp{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;color:var(--acc);text-transform:uppercase;display:inline-flex;align-items:center;gap:5px}
-.orbit-sat .os-lamp i{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px var(--acc);animation:lampPulse 2s ease-in-out infinite}
-.orbit-sat.front{border-color:rgba(140,200,255,.55);box-shadow:0 0 42px var(--acc-dim),0 0 0 1px var(--acc-dim)}
-.orbit-sat.back{opacity:.3;filter:blur(.5px)}
+.orbit-3d{position:absolute;inset:0;width:100%;height:100%}
+.orbit-3d canvas{display:block}
 .orbit-detail{
   position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.9);
   width:min(430px,88%);padding:26px;border-radius:18px;z-index:5;
@@ -356,13 +327,7 @@ section.block{padding:70px 0;border-top:1px solid var(--line)}
 .od-go{margin-top:16px;display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--acc);text-decoration:none;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:.2s}
 .od-go:hover{text-shadow:0 0 12px var(--acc)}
 @media(max-width:720px){
-  .orbit-stage{height:440px;perspective:900px}
-  .orbit-sat{width:132px;height:132px;margin:-66px 0 0 -66px}
-  .orbit-sat .os-icon{width:38px;height:38px}
-  .orbit-sat .os-icon svg{width:19px;height:19px}
-  .orbit-sat .os-name{font-size:13px}
-  .orbit-core{width:120px;height:120px;margin:-60px 0 0 -60px}
-  .oc-name{font-size:16px}
+  .orbit-stage{height:440px}
 }
 
 /* ── 工具页 Hero ── */
@@ -642,7 +607,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--line);padding:20px
       <div class="sec-head rv">
         <span class="sec-idx">// 01</span>
         <h2 class="sec-title">轨道指挥中心</h2>
-        <span class="sec-note">3D orbit · 点击卫星聚焦 · 点击 ✕ 恢复环绕</span>
+        <span class="sec-note">solar orbit · 行星公转 · 点击行星聚焦 · 点击 ✕ 恢复公转</span>
       </div>
       <div class="orbit-stage rv">
         <div class="orbit-3d" id="orbit3d"></div>
@@ -1025,6 +990,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--line);padding:20px
     <a class="foot-mail" href="mailto:j2ee_cn@126.com">j2ee_cn@126.com</a>
   </div>
 </footer>
+<script src="assets/three.min.js"></script>
 <script>
 // ══ 全局粒子网络（跟随鼠标） ══
 (function(){
@@ -1146,7 +1112,7 @@ var io=new IntersectionObserver(function(es){
 },{threshold:.1});
 document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el);});
 
-// ══ 3D 轨道指挥中心（环绕运行 · 点击聚焦 · 点击后停止旋转） ══
+// ══ 3D 轨道指挥中心（Three.js 太阳系 · 行星公转 · 点击聚焦后停止） ══
 (function(){
   var stage=document.getElementById('orbit3d');
   if(!stage)return;
@@ -1181,29 +1147,164 @@ document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el
      cmd:'magic-matrix publish --platforms douyin,kuaishou',
      icon:'<svg viewBox="0 0 24 24"><path d="M4 4h4v4H4zM10 4h4v4h-4zM16 4h4v4h-4zM4 10h4v4H4zM10 10h4v4h-4zM16 10h4v4h-4zM4 16h4v4H4zM10 16h4v4h-4zM16 16h4v4h-4z"/></svg>'}
   ];
-  var N=tools.length,base=[],sats=[],A=0,target=null,paused=false,running=true,R=300;
-  function radius(){var w=stage.parentElement.clientWidth;R=Math.min(300,Math.max(150,w*0.34));}
-  function layout(){sats.forEach(function(s,i){s.style.transform='rotateY('+base[i]+'deg) translateZ('+R+'px)';});}
-  radius();layout();
-  addEventListener('resize',function(){radius();layout();});
+  var N=tools.length,base=[],A=0,target=null,paused=false,running=true;
+  var detailEl=document.getElementById('orbitDetail');
+  var DEG=Math.PI/180;
+  var R_MAIN=3.0,R_MID=1.98,R_FAR=4.08;
+  var renderer,scene,camera,root,sun,sunRing,planets=[],meshes=[];
+  var raycaster=new THREE.Raycaster(),nDC={x:0,y:0},hovered=null;
+
+  try{
+    renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  }catch(e){
+    stage.innerHTML='<div style="color:var(--text-dim);font-family:var(--mono);font-size:12px;padding:40px 0;text-align:center">WebGL 不可用，请更换现代浏览器</div>';
+    return;
+  }
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+  renderer.setClearColor(0x000000,0);
+  stage.appendChild(renderer.domElement);
+
+  scene=new THREE.Scene();
+  scene.add(new THREE.AmbientLight(0x8fa3c4,.6));
+  var sunLight=new THREE.PointLight(0x2ee6c8,1.7,40);
+  scene.add(sunLight);
+  var keyLight=new THREE.DirectionalLight(0xffffff,.5);
+  keyLight.position.set(6,10,6);
+  scene.add(keyLight);
+
+  camera=new THREE.PerspectiveCamera(45,1,.1,100);
+  camera.position.set(0,4.2,6.2);
+  camera.lookAt(0,0,0);
+
+  root=new THREE.Group();
+  scene.add(root);
+
+  // ── 轨道环 ──
+  function ringPts(r,n){var p=[];for(var i=0;i<n;i++){var a=i/n*Math.PI*2;p.push(new THREE.Vector3(Math.sin(a)*r,0,Math.cos(a)*r));}return p;}
+  function addRing(r,color,opacity,dash){
+    var geo=new THREE.BufferGeometry().setFromPoints(ringPts(r,160));
+    var mat=dash
+      ?new THREE.LineDashedMaterial({color:color,transparent:true,opacity:opacity,dashSize:.14,gapSize:.1})
+      :new THREE.LineBasicMaterial({color:color,transparent:true,opacity:opacity});
+    var line=new THREE.LineLoop(geo,mat);
+    if(dash)line.computeLineDistances();
+    root.add(line);
+  }
+  addRing(R_MAIN,0x78aaff,.4,false);
+  addRing(R_MID,0x78aaff,.18,true);
+  addRing(R_FAR,0x2ee6c8,.14,false);
+
+  // ── 发光贴图工具 ──
+  function glowTexture(inner,outer){
+    var c=document.createElement('canvas');c.width=c.height=256;
+    var g=c.getContext('2d');
+    var gr=g.createRadialGradient(128,128,0,128,128,128);
+    gr.addColorStop(0,inner);gr.addColorStop(.4,outer);gr.addColorStop(1,'rgba(0,0,0,0)');
+    g.fillStyle=gr;g.fillRect(0,0,256,256);
+    return new THREE.CanvasTexture(c);
+  }
+  function labelTexture(text,color){
+    var c=document.createElement('canvas');c.width=512;c.height=140;
+    var g=c.getContext('2d');
+    g.font='700 54px "Chakra Petch","PingFang SC","Microsoft YaHei",sans-serif';
+    g.textAlign='center';g.textBaseline='middle';
+    g.shadowColor=color;g.shadowBlur=20;
+    g.fillStyle=color;g.fillText(text,256,70);
+    return new THREE.CanvasTexture(c);
+  }
+
+  // ── 太阳 ──
+  sun=new THREE.Mesh(
+    new THREE.SphereGeometry(.8,48,48),
+    new THREE.MeshBasicMaterial({color:0x2ee6c8})
+  );
+  root.add(sun);
+  var sunHalo=new THREE.Sprite(new THREE.SpriteMaterial({
+    map:glowTexture('rgba(46,230,200,.8)','rgba(46,230,200,.16)'),
+    transparent:true,depthWrite:false,blending:THREE.AdditiveBlending
+  }));
+  sunHalo.scale.set(8,8,1);sunHalo.position.y=.4;
+  root.add(sunHalo);
+  sunRing=new THREE.LineLoop(
+    new THREE.BufferGeometry().setFromPoints(ringPts(1.18,96)),
+    new THREE.LineDashedMaterial({color:0x2ee6c8,transparent:true,opacity:.5,dashSize:.1,gapSize:.07})
+  );
+  sunRing.computeLineDistances();
+  root.add(sunRing);
+
+  // ── 行星 ──
   tools.forEach(function(t,i){
     base[i]=i*360/N;
-    var el=document.createElement('div');
-    el.className='orbit-sat st-'+t.id;
-    el.style.setProperty('--acc',t.acc);
-    el.style.setProperty('--acc-dim',t.dim);
-    el.innerHTML='<span class="os-icon">'+t.icon+'</span><span class="os-name">magic<b>-'+t.short+'</b></span><span class="os-lamp"><i></i>'+t.status+'</span>';
-    el.style.transform='rotateY('+base[i]+'deg) translateZ('+R+'px)';
-    el.addEventListener('click',function(e){e.stopPropagation();focus(i);});
-    stage.appendChild(el);
-    sats.push(el);
+    var grp=new THREE.Group();
+    var col=new THREE.Color(t.acc);
+    var mesh=new THREE.Mesh(
+      new THREE.SphereGeometry(.42,36,36),
+      new THREE.MeshStandardMaterial({
+        color:col,emissive:col,emissiveIntensity:.45,metalness:.25,roughness:.42
+      })
+    );
+    mesh.userData.index=i;
+    grp.add(mesh);
+    var halo=new THREE.Sprite(new THREE.SpriteMaterial({
+      map:glowTexture(t.acc+'cc',t.dim),
+      transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:.95
+    }));
+    halo.scale.set(2.2,2.2,1);
+    grp.add(halo);
+    var label=new THREE.Sprite(new THREE.SpriteMaterial({
+      map:labelTexture('magic-'+t.short,t.acc),
+      transparent:true,depthWrite:false
+    }));
+    label.position.y=1.12;label.scale.set(1.9,.52,1);
+    grp.add(label);
+    root.add(grp);
+    planets.push(grp);
+    meshes.push(mesh);
   });
-  var core=document.createElement('div');
-  core.className='orbit-core';
-  core.innerHTML='<span class="oc-ring"></span><span class="oc-name">magic<b>-cli</b></span><span class="oc-sub">command family</span>';
-  core.addEventListener('click',function(){resume();});
-  stage.appendChild(core);
-  var detailEl=document.getElementById('orbitDetail');
+  meshes.push(sun);
+
+  function positionPlanets(){
+    planets.forEach(function(grp,i){
+      var a=(base[i]+A)*DEG;
+      grp.position.set(Math.sin(a)*R_MAIN,Math.sin(i*2.4)*.18,Math.cos(a)*R_MAIN);
+    });
+  }
+  function resize(){
+    var w=stage.clientWidth,h=stage.clientHeight;
+    if(!w||!h)return;
+    renderer.setSize(w,h);
+    camera.aspect=w/h;
+    camera.updateProjectionMatrix();
+    root.scale.setScalar(Math.min(1,Math.max(.5,w/900)));
+  }
+  addEventListener('resize',resize);
+  resize();
+
+  function pick(ev){
+    var r=renderer.domElement.getBoundingClientRect();
+    nDC.x=((ev.clientX-r.left)/r.width)*2-1;
+    nDC.y=-((ev.clientY-r.top)/r.height)*2+1;
+    raycaster.setFromCamera(nDC,camera);
+    return raycaster.intersectObjects(meshes);
+  }
+  renderer.domElement.addEventListener('pointermove',function(ev){
+    var hits=pick(ev),h=hits.length?hits[0].object:null;
+    if(h===sun)h=null;
+    if(h===hovered)return;
+    if(hovered){hovered.scale.setScalar(1);hovered.material.emissiveIntensity=.45;}
+    hovered=h;
+    if(hovered){hovered.scale.setScalar(1.16);hovered.material.emissiveIntensity=.9;}
+    stage.style.cursor=hovered?'pointer':'';
+  });
+  renderer.domElement.addEventListener('click',function(ev){
+    if(detailEl.classList.contains('show'))return;
+    var hits=pick(ev);
+    if(!hits.length)return;
+    var o=hits[0].object;
+    if(o===sun){resume();return;}
+    if(o.userData.index!==undefined)focus(o.userData.index);
+  });
+
   function focus(i){
     target=-(base[i]);
     paused=true;
@@ -1227,6 +1328,18 @@ document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el
     target=null;
     paused=false;
   }
+
+  // 调试钩子（供自动化验证）
+  window.__orbit={
+    getA:function(){return A;},
+    isPaused:function(){return paused;},
+    screenPos:function(i){
+      var v=new THREE.Vector3().copy(planets[i].position).applyMatrix4(root.matrixWorld).project(camera);
+      var r=renderer.domElement.getBoundingClientRect();
+      return {x:r.left+(v.x+1)/2*r.width,y:r.top+(1-v.y)/2*r.height};
+    }
+  };
+
   function tick(){
     if(!running)return;
     if(target!==null){
@@ -1236,12 +1349,10 @@ document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el
     }else if(!paused&&!reduced){
       A=(A+0.14)%360;
     }
-    stage.style.transform='rotateY('+A+'deg)';
-    sats.forEach(function(s,i){
-      var eff=((base[i]+A)%360+360)%360;
-      s.classList.toggle('front',eff<28||eff>332);
-      s.classList.toggle('back',eff>152&&eff<208);
-    });
+    positionPlanets();
+    sun.rotation.y+=.004;
+    sunRing.rotation.y-=.008;
+    renderer.render(scene,camera);
     requestAnimationFrame(tick);
   }
   var io=new IntersectionObserver(function(es){
