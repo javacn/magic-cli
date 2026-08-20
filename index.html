@@ -570,7 +570,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--line);padding:20px
     <nav class="nav-tabs">
       <button data-page="home" class="on">⌂ home</button>
       <button data-page="wiki">magic-wiki</button>
-      <button data-page="video" title="magic-video · 开发中，未上线">magic-video<span class="t-flag"></span></button>
+      <button data-page="video">magic-video</button>
       <button data-page="ppt" title="magic-ppt · 开发中，未上线">magic-ppt<span class="t-flag"></span></button>
       <button data-page="test" title="magic-test · 开发中，未上线">magic-test<span class="t-flag"></span></button>
       <button data-page="canvas" title="magic-canvas · 开发中，未上线">magic-canvas<span class="t-flag"></span></button>
@@ -593,9 +593,10 @@ footer{position:relative;z-index:1;border-top:1px solid var(--line);padding:20px
       <div class="cta rv">
         <a class="btn btn-primary" data-go="wiki" data-anchor="#agent">$ 一键安装提示词</a>
         <a class="btn btn-ghost" data-go="wiki">→ 查看 magic-wiki</a>
+        <a class="btn btn-ghost" data-go="video">→ 查看 magic-video</a>
       </div>
       <div class="hero-stats rv">
-        <div><span class="num" data-count="1" data-pad="2">01</span>已发布工具</div>
+        <div><span class="num" data-count="2" data-pad="2">02</span>已发布工具</div>
         <div><span class="num" data-count="7" data-pad="2">07</span>系列成员</div>
         <div><span class="num" data-inf="1">∞</span>永远免费</div>
       </div>
@@ -768,33 +769,71 @@ footer{position:relative;z-index:1;border-top:1px solid var(--line);padding:20px
   <div class="tool-hero">
     <div class="wrap">
       <div class="tname rv"><span class="grad">magic-video</span><span class="cursor"></span></div>
-      <div class="tool-status rv"><span class="st st-wip"><span class="pulse"></span> 开发中</span></div>
-      <p class="lead rv">视频内容处理 CLI —— <b>下载 / 转码 / 字幕 / 剪辑</b>，把繁琐的 ffmpeg + yt-dlp 组合封装成一条命令。</p>
+      <div class="tool-status rv"><span class="st st-live"><span class="pulse"></span> v0.1.1 · 已发布</span><span class="st st-live">npm 可安装</span></div>
+      <p class="lead rv">中文网文 / 短剧剧本 / 视频分镜一体化内容生产 CLI —— <b>从大纲到分镜的完整内容生产流水线</b>。以<b style="color:var(--text)">单一二进制</b>（Go 编译）分发，装完即用，无需 Go / Node 环境。</p>
       <div class="cta rv"><a class="btn btn-ghost" data-go="home">⌂ 返回首页</a></div>
     </div>
   </div>
+
   <section class="block">
     <div class="wrap">
-      <div class="sec-head rv"><h3 class="sec-title" style="font-size:22px">规划能力</h3><span class="sec-note">planned</span></div>
-      <div class="grid-cap rv">
-        <div class="cap"><span class="ico">⬇️</span><h4>视频下载</h4><p>yt-dlp 内核，覆盖 <code>B 站 / YouTube / Twitter/X</code> 等平台，可选清晰度与格式。</p></div>
-        <div class="cap"><span class="ico">🔄</span><h4>批量转码</h4><p>文件夹级批量转换格式 / 分辨率 / 码率，硬件加速编码。</p></div>
-        <div class="cap"><span class="ico">💬</span><h4>智能字幕</h4><p>语音转写生成字幕，支持双语对照与关键词高亮。</p></div>
-        <div class="cap"><span class="ico">✂️</span><h4>脚本化剪辑</h4><p>ffmpeg 封装：按时间轴剪切 / 拼接 / 加水印，纯命令驱动。</p></div>
+      <div class="sec-head rv"><h3 class="sec-title" style="font-size:22px">特色功能</h3><span class="sec-note">features</span></div>
+      <div class="grid-feat rv">
+        <div class="feat"><span class="ico">📖</span><h4>小说创作（novel）</h4><p>一键开大纲（智能默认 50 章 / 3 卷），逐章 Beat Sheet → 写作（2500-4000 字）→ 质检 → 修订，支持 <code>batch generate</code> 批量生成整本。</p></div>
+        <div class="feat"><span class="ico">✅</span><h4>三重合议质检</h4><p>anti-AI / 文本退化本地校验 + Save the Cat 章级节拍 + 6 维 LLM 评分（设定 / 人物 / 节奏 / 钩子 / 文笔 / 密度），总分低于 72 自动 BLOCK。</p></div>
+        <div class="feat"><span class="ico">🔄</span><h4>自动精修循环</h4><p><code>chapter autorevise</code> 让写手模型与评审模型多轮对抗（默认 5 轮），直到分数达标（默认 80）或达到轮数上限。</p></div>
+        <div class="feat"><span class="ico">🧩</span><h4>跨章节校审</h4><p><code>cross-review</code> 检查全本连续性，<code>global-refine</code> 按校审报告做最小化精修，长篇连载不崩人设、不丢线索。</p></div>
+        <div class="feat"><span class="ico">🎭</span><h4>短剧剧本（script）</h4><p>单集 60-90 秒，<code>episode generate</code> 生成 / <code>episode improve</code> 多轮改良（默认 3 轮、阈值 90），支持角色资产与跨集连续性。</p></div>
+        <div class="feat"><span class="ico">🎬</span><h4>视频分镜（video）</h4><p><code>storyboard generate</code> 把剧本全文拆成导演可用分镜台本（中文台本 + 英文图像 prompt），注入癫爽硬约束与 12 铁律镜头设计，支持首尾帧 / 全拆 / 关键镜头模式。</p></div>
+        <div class="feat"><span class="ico">🎨</span><h4>风格与模型注入</h4><p>内置 11 个美术风格预设（国风 / 3D 国潮 / 真人都市等）、题材叙事卡与 Seedance 2.0 / 镜头设计技能包、5 个视频模型 prompt，按项目 <code>art_style</code> 自动装配。</p></div>
+        <div class="feat"><span class="ico">💬</span><h4>飞书实时进度卡</h4><p>批量生成时推送飞书卡片，折叠面板实时展示大纲 / 章节生成 / 全局校审 / 全局精修各阶段进度。</p></div>
+        <div class="feat"><span class="ico">💰</span><h4>用量成本透明</h4><p><code>magic-cli cost</code> 按 stage 聚合 LLM 调用次数、token 与人民币成本（内置模型定价表），日志存 <code>~/.magic-video/usage_log.json</code>。</p></div>
+        <div class="feat"><span class="ico">🛡️</span><h4>15 项健康检查</h4><p><code>magic-cli doctor</code> 一键体检 Go 环境、配置、LLM 凭据、prompts、技能包与内置资源，<code>--json</code> 输出对 CI 友好。</p></div>
       </div>
-      <div class="sec-head rv" style="margin-top:56px"><h3 class="sec-title" style="font-size:22px">命令形态预览</h3><span class="sec-note">preview</span></div>
+
+      <div class="sec-head rv" style="margin-top:56px"><h3 class="sec-title" style="font-size:22px">安装</h3><span class="sec-note">npm · cn-mirror</span></div>
       <div class="terminal rv">
-        <div class="term-bar"><span class="c r"></span><span class="c y"></span><span class="c g"></span><span class="t">magic-video --help（设计稿）</span></div>
-        <div style="padding:14px 20px">
-          <div class="cmd-row"><span class="pm">$</span> magic-video download &lt;url&gt; <span class="b">--format 1080p</span> <span class="cm"># 下载视频</span></div>
-          <div class="cmd-row"><span class="pm">$</span> magic-video transcode in.mp4 <span class="b">--to mp4 --crf 18</span> <span class="cm"># 转码</span></div>
-          <div class="cmd-row"><span class="pm">$</span> magic-video subtitle demo.mp4 <span class="b">--lang zh</span> <span class="cm"># 字幕</span></div>
-          <div class="cmd-row"><span class="pm">$</span> magic-video cut demo.mp4 <span class="b">--from 00:01:00 --to 00:02:30</span> <span class="cm"># 剪辑</span></div>
-        </div>
+        <div class="term-bar"><span class="c r"></span><span class="c y"></span><span class="c g"></span><span class="t">terminal — npm install</span></div>
+        <div class="term-body"><span class="pm">$</span> <span class="c-blue">npm install -g @magicstock/magic-cli</span>
+<span class="pm">$</span> <span class="c-blue">npm install -g @magicstock/magic-cli --registry=https://registry.npmmirror.com</span>  <span class="c-soft"># 国内加速（npmmirror）</span>
+
+<span class="c-soft">支持平台：macOS（Apple Silicon）、Windows x64。二进制直接打进 npm 包，安装即用，无需 GitHub token、无需下载。</span></div>
       </div>
-      <div class="terminal rv" style="margin-top:20px;box-shadow:none">
-        <div class="term-bar"><span class="c r"></span><span class="c y"></span><span class="c g"></span><span class="t">status</span></div>
-        <div class="term-body"><span class="c-org">▲ 开发中</span> —— 核心链路已完成内部验证，正式版本发布后将第一时间更新本页。</div>
+
+      <div class="sec-head rv" style="margin-top:56px"><h3 class="sec-title" style="font-size:22px">快速开始</h3><span class="sec-note">quickstart</span></div>
+      <div class="terminal rv">
+        <div class="term-bar"><span class="c r"></span><span class="c y"></span><span class="c g"></span><span class="t">terminal — zsh</span></div>
+        <div class="term-body"><span class="pm">$</span> <span class="c-blue">magic-cli doctor</span>                                    <span class="c-soft"># 环境体检</span>
+<span class="pm">$</span> <span class="c-blue">magic-cli novel +new</span> --project 凡人末日传 --genre 科幻末世 --premise "重生回末日前7天"   <span class="c-soft"># ① 一键开大纲</span>
+<span class="pm">$</span> <span class="c-blue">magic-cli novel chapter generate</span> --project 凡人末日传 --chapter ch-001  <span class="c-soft"># 写单章（含质检修订）</span>
+<span class="pm">$</span> <span class="c-blue">magic-cli novel batch generate</span> --project 凡人末日传      <span class="c-soft"># 批量生成整本</span>
+<span class="pm">$</span> <span class="c-blue">magic-cli novel style distill</span> --author 猫腻 --work 择天记   <span class="c-soft"># 作家风格蒸馏</span>
+<span class="pm">$</span> <span class="c-blue">magic-cli script episode generate</span> --project 凡人末日传 --episode episode_001   <span class="c-soft"># ② 短剧单集</span>
+<span class="pm">$</span> <span class="c-blue">magic-cli script episode improve</span> --project 凡人末日传 --episode episode_001 --max-rounds 3
+<span class="pm">$</span> <span class="c-blue">magic-cli video storyboard generate</span> --project 凡人末日传 --episode episode_001 --mode first_last_frame --style 2D_chinese_guofeng  <span class="c-soft"># ③ 分镜台本</span>
+<span class="pm">$</span> <span class="c-blue">magic-cli projects list</span> / <span class="c-blue">magic-cli cost</span>         <span class="c-soft"># 项目管理 / 成本</span></div>
+      </div>
+
+      <div class="sec-head rv" style="margin-top:56px"><h3 class="sec-title" style="font-size:22px">子命令一览</h3><span class="sec-note">commands</span></div>
+      <div class="terminal rv" style="box-shadow:none">
+        <div class="term-bar"><span class="c r"></span><span class="c y"></span><span class="c g"></span><span class="t">magic-cli --help</span></div>
+        <div style="padding:6px 10px">
+          <table class="tbl">
+            <tr><th>COMMAND</th><th>DESCRIPTION</th></tr>
+            <tr><td>magic-cli novel +new</td><td>一键开新大纲（智能默认 50 章 / 3 卷）</td></tr>
+            <tr><td>magic-cli novel chapter generate</td><td>完整生成单章（plan+write+review+revise）</td></tr>
+            <tr><td>magic-cli novel chapter autorevise</td><td>自动精修循环（写手 vs 评审多轮对抗）</td></tr>
+            <tr><td>magic-cli novel batch generate</td><td>批量生成所有章节</td></tr>
+            <tr><td>magic-cli novel short</td><td>短篇单稿（1200-2000 字一次性）</td></tr>
+            <tr><td>magic-cli novel style &lt;action&gt;</td><td>作家风格指纹蒸馏与管理（distill/list/show/set）</td></tr>
+            <tr><td>magic-cli script episode generate</td><td>单集剧本生成（60-90 秒/集）</td></tr>
+            <tr><td>magic-cli script episode improve</td><td>多轮改良剧本（默认 3 轮、阈值 90）</td></tr>
+            <tr><td>magic-cli video storyboard generate</td><td>完整分镜生成（中文台本 + 英文图像 prompt）</td></tr>
+            <tr><td>magic-cli doctor</td><td>15 项环境健康检查（--json 输出 CI 友好）</td></tr>
+            <tr><td>magic-cli config &lt;action&gt;</td><td>配置管理（init/show/bind openclaw/status）</td></tr>
+            <tr><td>magic-cli cost</td><td>LLM 用量与成本聚合（按 stage 分组）</td></tr>
+          </table>
+        </div>
       </div>
     </div>
   </section>
@@ -1122,9 +1161,9 @@ document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el
      desc:'网页剪藏 / 搜索 B 站 + 公众号 / 队列管理',
      cmd:'magic-wiki clip https://mp.weixin.qq.com/s/xxx',
      icon:'<svg viewBox="0 0 24 24"><path d="M6.5 3.5h7l4 4v13h-11z"/><path d="M13.5 3.5v4h4"/><path d="M9 13h6M9 16.5h6"/></svg>'},
-    {id:'video',name:'magic-video',short:'video',acc:'#a78bfa',dim:'rgba(167,139,250,.18)',status:'standby',wip:true,
-     desc:'视频内容处理 CLI：下载 / 转码 / 字幕 / 剪辑',
-     cmd:'magic-video pull "bilibili.com/video/BVxxx"',
+    {id:'video',name:'magic-video',short:'video',acc:'#a78bfa',dim:'rgba(167,139,250,.18)',status:'online',wip:false,
+     desc:'中文网文 / 短剧剧本 / 视频分镜一体化内容生产',
+     cmd:'magic-cli novel +new --project 凡人末日传 --genre 科幻末世',
      icon:'<svg viewBox="0 0 24 24"><path d="M5 4.5l14 7.5-14 7.5z"/></svg>'},
     {id:'ppt',name:'magic-ppt',short:'ppt',acc:'#ff9f43',dim:'rgba(255,159,67,.16)',status:'standby',wip:true,
      desc:'演示文稿生成 CLI：大纲 / 主题 / 图表 / 导出',
@@ -1658,7 +1697,7 @@ document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el
 (function(){
   var el=document.getElementById('typeCmd');
   if(!el)return;
-  var cmds=['magic-wiki init','magic-wiki clip https://mp.weixin.qq.com/s/xxx','magic-wiki search "AI 短剧"','magic-wiki enqueue <bilibili-url>','magic-matrix publish video.mp4 --platforms douyin,kuaishou'];
+  var cmds=['magic-wiki init','magic-wiki clip https://mp.weixin.qq.com/s/xxx','magic-wiki search "AI 短剧"','magic-wiki enqueue <bilibili-url>','magic-cli doctor','magic-cli novel chapter generate --project 凡人末日传 --chapter ch-001','magic-cli video storyboard generate --mode first_last_frame --style 2D_chinese_guofeng','magic-matrix publish video.mp4 --platforms douyin,kuaishou'];
   var ci=0,ch=0,del=false;
   (function tick(){
     var cur=cmds[ci];
