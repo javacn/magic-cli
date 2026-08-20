@@ -17,8 +17,8 @@
 2. 验证：执行 magic-wiki --version，确认输出版本号
 3. 查看配置：执行 magic-wiki config path，确认配置文件位置（默认 ~/.magic-wiki/config.json）
 4. 配置飞书凭证（用于剪藏到飞书、搜索发送汇总卡片；用户不需要飞书则跳过）：
-   - magic-wiki config set feishu.app_id "<用户的飞书应用 APP ID>"
-   - magic-wiki config set feishu.app_secret "<用户的飞书应用 APP SECRET>"
+   - 推荐：运行 magic-wiki init，按交互式向导填写 App ID / App Secret 等
+   - 或手动：magic-wiki config set feishu.app_id "<用户的飞书应用 APP ID>"，magic-wiki config set feishu.app_secret "<用户的飞书应用 APP SECRET>"
 5. 可选配置（按用户需要执行）：
    - magic-wiki config set feishu.wiki_node "<知识库节点 token>"        # 保存到飞书知识库
    - magic-wiki config set video_note.notify_target "<用户 open_id>"     # 飞书通知目标
@@ -41,7 +41,7 @@
 
 | 工具 | 状态 | 说明 | 安装 |
 |------|------|------|------|
-| [magic-wiki](#magic-wiki) | ✅ 已发布 v1.0.3 | 网页剪藏 / 搜索 B 站 + 公众号 / 队列管理 | `npm install -g @magicstock/magic-wiki` |
+| [magic-wiki](#magic-wiki) | ✅ 已发布 v1.0.4 | 网页剪藏 / 搜索 B 站 + 公众号 / 队列管理 | `npm install -g @magicstock/magic-wiki` |
 | magic-video | 🚧 开发中 | 视频内容处理 CLI | 即将推出 |
 | magic-ppt | 🚧 规划中 | 演示文稿生成 CLI | 敬请期待 |
 | magic-test | 🚧 规划中 | 自动化测试 CLI | 敬请期待 |
@@ -96,7 +96,15 @@ npm install -g @magicstock/magic-wiki
 （自动合并默认配置并生成目录，无需手工建文件）。读写推荐使用 `config` 子命令，
 敏感字段（`app_secret` 等）展示时自动脱敏。
 
-**第 1 步：查看配置文件位置**
+**第 1 步：运行初始化向导（推荐）**
+
+`magic-wiki init` 是 v1.0.4 新增的交互式配置向导，引导你依次填写飞书凭证、笔记保存根目录与通知目标，直接回车表示保留当前值 / 跳过：
+
+```bash
+magic-wiki init
+```
+
+**第 2 步：查看配置文件位置**
 
 ```bash
 magic-wiki config path
@@ -107,7 +115,7 @@ magic-wiki config path
 # temp_dir      ~/.magic-wiki/temp
 ```
 
-**第 2 步：配置 LLM 模型（最重要，所有 AI 功能依赖）**
+**第 3 步：配置 LLM 模型（最重要，所有 AI 功能依赖）**
 
 magic-wiki 的笔记生成、视频 / 文章分析、视觉理解等 AI 能力，都通过
 **OpenAI 兼容 API** 调用大模型完成，因此必须先配置模型供应商 `llm.providers`。
@@ -151,7 +159,7 @@ magic-wiki config set llm.fallback_chain '["minimax/MiniMax-M3","你的备选模
 - 主模型失败会自动沿 `fallback_chain` 切换备选（429 / 超时自动熔断与冷却）
 - 未配置 `llm.providers` 时，会尝试从 `~/.openclaw/openclaw.json` 读取历史配置兜底
 
-**第 3 步：配置飞书凭证（剪藏到飞书 / 搜索发送汇总卡片时需要）**
+**第 4 步：配置飞书凭证（剪藏到飞书 / 搜索发送汇总卡片时需要）**
 
 在[飞书开放平台](https://open.feishu.cn/)创建自建应用，拿到 App ID 与 App Secret 后写入：
 
@@ -160,7 +168,7 @@ magic-wiki config set feishu.app_id "cli_xxx"        # 你的飞书应用 App ID
 magic-wiki config set feishu.app_secret "xxx"        # 你的飞书应用 App Secret
 ```
 
-**第 4 步：可选配置**
+**第 5 步：可选配置**
 
 | 配置键 | 作用 | 示例 |
 |--------|------|------|
@@ -172,11 +180,11 @@ magic-wiki config set feishu.app_secret "xxx"        # 你的飞书应用 App Se
 | `video_note.notify_target` | 飞书通知目标 open_id | `magic-wiki config set video_note.notify_target "ou_xxx"` |
 | `video_note.concurrency` | 队列并发数（默认 2） | `magic-wiki config set video_note.concurrency 4` |
 | `video_note.asr_engine` | 语音转写引擎 | `magic-wiki config set video_note.asr_engine "faster-whisper"` |
-| `raw_dir` | 笔记保存根目录（默认 `~/.magic-wiki/wiki`） | `magic-wiki config set raw_dir "~/notes"` |
+| `raw_dir` | 笔记保存根目录（markdown 落盘位置） | `magic-wiki config set raw_dir "~/notes"` |
 
 > `config set` 的值会自动识别 JSON 类型：数字、布尔、数组按原类型写入，其余按字符串处理。
 
-**第 5 步：验证配置**
+**第 6 步：验证配置**
 
 ```bash
 magic-wiki config show                # 查看全部配置（敏感字段脱敏）
@@ -189,6 +197,9 @@ magic-wiki config env                 # 查看 .env 加载情况
 ### 快速开始
 
 ```bash
+# 首次使用：交互式初始化配置（飞书凭证 / 保存路径 / 通知目标）
+magic-wiki init
+
 # 剪藏网页（默认保存到 markdown）
 magic-wiki clip https://mp.weixin.qq.com/s/xxx
 
@@ -216,7 +227,7 @@ magic-wiki enqueue https://www.youtube.com/playlist?list=xxx
 magic-wiki config show                # 查看配置（敏感字段脱敏）
 magic-wiki config path                # 查看路径
 magic-wiki config get feishu.app_id   # 读取单个配置项（支持点路径）
-magic-wiki config unset raw_dir   # 恢复默认保存目录（~/.magic-wiki/wiki）
+magic-wiki config unset raw_dir   # 删除配置项
 ```
 
 ### 使用效果
@@ -233,6 +244,7 @@ magic-wiki config unset raw_dir   # 恢复默认保存目录（~/.magic-wiki/wik
 | `magic-wiki search <query>` | 搜索 B 站 + 公众号 |
 | `magic-wiki queue <action>` | 队列管理（start/stop/status/poll/clean） |
 | `magic-wiki enqueue <url>` | 视频 / 合集 / 文章快捷入队 |
+| `magic-wiki init` | 交互式初始化配置向导 |
 | `magic-wiki config <action>` | 配置管理（show/path/env/get/set/unset） |
 
 ### 相关链接
