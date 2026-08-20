@@ -1316,9 +1316,11 @@ document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el
     var grp=new THREE.Group();
     var body=new THREE.Group();
     grp.add(body);
-    var x=(i-(N-1)/2)*SPACING;
-    // 城区式前后错落：中间主楼后置、两侧建筑前伸环抱，形成纵深街区
-    var homeZ=-Math.cos((i-(N-1)/2)*.5)*1.15;
+    // 城镇街区布局：沿主街两侧分前后两排错落布置（后排 x 与前排完全错开，互不遮挡）
+    var ROW_Z=1.45;
+    var SLOTS={4:[-2.6,-1],0:[0,-1],5:[2.6,-1],1:[-3.9,1],3:[-1.3,1],2:[1.3,1],6:[3.9,1]};
+    var slot=SLOTS[i];
+    var x=slot[0],homeZ=slot[1]*ROW_Z;
     grp.position.set(x,0,homeZ);
     var anim={phase:Math.random()*6.28};
     var k,o,dark=darkMat(t.acc);
@@ -1421,6 +1423,45 @@ document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el
       anim:anim,kind:arch.kind});
   });
 
+  // ── 城镇街道：地面 + 街区网格 + 主街 + 中央环岛 + 沿街路灯 ──
+  (function(){
+    var ground=new THREE.Mesh(new THREE.PlaneGeometry(17,9.5),
+      new THREE.MeshStandardMaterial({color:0x0c1322,roughness:.95,metalness:.08}));
+    ground.rotation.x=-Math.PI/2;ground.position.y=0;root.add(ground);
+    var grid=new THREE.GridHelper(17,12,0x2b4a78,0x16233c);
+    grid.position.y=.006;grid.material.transparent=true;grid.material.opacity=.5;root.add(grid);
+    // 主街路面：沥青底 + 噪点 + 中央虚线 + 路缘线（纹理沿 x）
+    function roadTex(){
+      var c=document.createElement('canvas');c.width=1024;c.height=128;
+      var g=c.getContext('2d');
+      g.fillStyle='#10172a';g.fillRect(0,0,1024,128);
+      for(var i=0;i<1600;i++){g.fillStyle='rgba(190,220,255,'+(Math.random()*.045)+')';g.fillRect(Math.random()*1024,Math.random()*128,1,1);}
+      g.fillStyle='rgba(210,235,255,.5)';
+      for(var x=0;x<1024;x+=128){g.fillRect(x,61,64,6);}
+      g.fillStyle='rgba(120,170,255,.28)';g.fillRect(0,3,1024,4);g.fillRect(0,121,1024,4);
+      return new THREE.CanvasTexture(c);
+    }
+    var road=new THREE.Mesh(new THREE.PlaneGeometry(13.2,2.5),
+      new THREE.MeshStandardMaterial({map:roadTex(),roughness:.9,metalness:.06,emissive:0x1b2c4e,emissiveIntensity:.3}));
+    road.rotation.x=-Math.PI/2;road.position.y=.012;road.position.z=0;root.add(road);
+    // 中央环岛（魔法喷泉）
+    var island=new THREE.Mesh(new THREE.CylinderGeometry(.62,.68,.07,22),darkMat('#22304f'));
+    island.position.y=.02;root.add(island);
+    var ringm=new THREE.Mesh(new THREE.TorusGeometry(.5,.04,8,30),
+      new THREE.MeshStandardMaterial({color:0x2ee6c8,emissive:0x2ee6c8,emissiveIntensity:1.2}));
+    ringm.rotation.x=Math.PI/2;ringm.position.y=.06;root.add(ringm);
+    var pole=cy(.03,.03,.8,darkMat('#22304f'),6);pole.position.y=.44;root.add(pole);
+    var lampTop=sp(.08,glowMat(0x8fd8ff),10);lampTop.position.y=.9;root.add(lampTop);
+    var lampGlow=glowSprite('#8fd8ff',1.0);lampGlow.position.y=.9;root.add(lampGlow);
+    // 沿街路灯：街道两端 + 南排建筑之间的空隙
+    var lampSpots=[[-5.8,-1.45],[-5.8,1.45],[-2.2,1.45],[2.2,1.45],[5.8,-1.45],[5.8,1.45]];
+    lampSpots.forEach(function(p){
+      var post=cy(.035,.035,1.05,darkMat('#22304f'),6);post.position.set(p[0],.52,p[1]);root.add(post);
+      var head=sp(.065,glowMat(0xffd678),10);head.position.set(p[0],1.12,p[1]);root.add(head);
+      var hg=glowSprite('#ffd678',.85);hg.position.set(p[0],1.12,p[1]);root.add(hg);
+    });
+  })();
+
   // 建筑各自专属动画（每帧调用）
   function animateBuildings(){
     blds.forEach(function(b,i){
@@ -1474,8 +1515,8 @@ document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el
     renderer.setSize(w,h);
     camera.aspect=w/h;
     camera.updateProjectionMatrix();
-    // 按视口宽高比适配取景：窄屏回缩放全，宽屏放大填满（内容半宽约 8.2）
-    var fit=Math.tan(22.5*DEG)*camZ*(w/h)/8.2;
+    // 按视口宽高比适配取景：窄屏回缩放全，宽屏放大填满（城镇内容半宽约 5.5）
+    var fit=Math.tan(22.5*DEG)*camZ*(w/h)/5.5;
     root.scale.setScalar(Math.min(1.05,Math.max(.3,fit)));
   }
   addEventListener('resize',resize);
@@ -1549,6 +1590,13 @@ document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el
       v.applyMatrix4(root.matrixWorld).project(camera);
       var r=renderer.domElement.getBoundingClientRect();
       return r.left+(v.x+1)/2*r.width;
+    },
+    clickPoint:function(i){
+      var box=new THREE.Box3().setFromObject(blds[i].body);
+      var c=box.getCenter(tmpV).clone();
+      c.applyMatrix4(root.matrixWorld).project(camera);
+      var r=renderer.domElement.getBoundingClientRect();
+      return {x:r.left+(c.x+1)/2*r.width,y:r.top+(1-c.y)/2*r.height};
     },
     topY:function(i){
       var b=blds[i];
