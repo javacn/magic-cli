@@ -1,6 +1,6 @@
 # magic-cli
 
-**MagicAI 团队**推出的免费命令行工具箱（magic 系列 CLI）—— 一个命令家族，各司其职，装完即用。
+免费命令行工具箱（magic 系列 CLI）—— 一个命令家族，各司其职，装完即用。
 
 ---
 
@@ -10,7 +10,7 @@
 让它在你的电脑上自动完成 **magic-wiki** 的安装与配置：
 
 ```text
-你是一名终端助手。请在用户电脑上安装并配置 magic-wiki（MagicAI 团队 magic-cli 系列的命令行工具，用于网页剪藏、B 站 + 公众号搜索与队列管理）。
+你是一名终端助手。请在用户电脑上安装并配置 magic-wiki（magic-cli 系列的命令行工具，用于网页剪藏、B 站 + 公众号搜索与队列管理）。
 
 步骤：
 1. 安装：执行 npm install -g @magicstock/magic-wiki
@@ -33,7 +33,7 @@
 
 ## 简介
 
-**magic-cli** 是 **MagicAI 团队**推出的免费工具箱，由一系列独立的命令行工具组成：
+**magic-cli** 是免费的命令行工具箱，由一系列独立的命令行工具组成：
 每个 `magic-*` 解决一类具体需求，通过 npm 全局安装、以二进制形式分发，
 不依赖用户手动配置 Python 环境，装完即可在终端使用。
 
@@ -232,10 +232,16 @@ magic-wiki config unset raw_dir   # 恢复默认保存目录（~/.magic-wiki/wik
 
 ## 费用
 
-magic 系列由 **MagicAI 团队**推出，**永远免费使用**。
+magic 系列**永远免费使用**。
 
 ## 赞助作者
 
 如果 magic 系列对你有所帮助，欢迎扫码赞助，支持作者持续更新：
 
 <img src="assets/sponsor-qrcode.png" alt="赞助二维码" width="200" />
+
+## 联系方式
+
+如有问题、建议或合作意向，欢迎邮件联系：
+
+<j2ee_cn@126.com>
