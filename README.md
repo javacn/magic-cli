@@ -22,7 +22,7 @@
 5. 可选配置（按用户需要执行）：
    - magic-wiki config set feishu.wiki_node "<知识库节点 token>"        # 保存到飞书知识库
    - magic-wiki config set video_note.notify_target "<用户 open_id>"     # 飞书通知目标
-   - magic-wiki config set markdown.vault_path "~/notes"                 # markdown 保存目录
+   - magic-wiki config set raw_dir "~/notes"                                 # 笔记保存根目录（默认 ~/.magic-wiki/wiki）
 6. 验证配置：执行 magic-wiki config show（敏感字段自动脱敏）
 7. 功能自测：执行 magic-wiki search "测试" --limit 3
 
@@ -156,8 +156,7 @@ magic-wiki config set feishu.app_secret "xxx"        # 你的飞书应用 App Se
 | `video_note.notify_target` | 飞书通知目标 open_id | `magic-wiki config set video_note.notify_target "ou_xxx"` |
 | `video_note.concurrency` | 队列并发数（默认 2） | `magic-wiki config set video_note.concurrency 4` |
 | `video_note.asr_engine` | 语音转写引擎 | `magic-wiki config set video_note.asr_engine "faster-whisper"` |
-| `markdown.vault_path` | 剪藏到 markdown 的保存目录 | `magic-wiki config set markdown.vault_path "~/notes"` |
-| `base_dir` | 工作区根目录（默认自动推导） | `magic-wiki config set base_dir "/path/to/workspace"` |
+| `raw_dir` | 笔记保存根目录（默认 `~/.magic-wiki/wiki`） | `magic-wiki config set raw_dir "~/notes"` |
 
 > `config set` 的值会自动识别 JSON 类型：数字、布尔、数组按原类型写入，其余按字符串处理。
 
@@ -201,8 +200,14 @@ magic-wiki enqueue https://www.youtube.com/playlist?list=xxx
 magic-wiki config show                # 查看配置（敏感字段脱敏）
 magic-wiki config path                # 查看路径
 magic-wiki config get feishu.app_id   # 读取单个配置项（支持点路径）
-magic-wiki config unset markdown.vault_path   # 删除配置项
+magic-wiki config unset raw_dir   # 恢复默认保存目录（~/.magic-wiki/wiki）
 ```
+
+### 使用效果
+
+飞书端实时收到处理进度卡片，分阶段展示下载 / 转写 / 抽帧 / 画面 / 生成 / 保存进度：
+
+<img src="assets/feishu-usage.png" alt="飞书使用截图" width="600" />
 
 ### 子命令一览
 
