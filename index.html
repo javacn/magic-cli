@@ -1152,15 +1152,15 @@ document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el
   var DEG=Math.PI/180;
   // 7 座特色建筑：类型 / 标签高度 / 专属动画
   var ARCH=[
-    {kind:'tower',     labelY:4.35, feature:'orb'},     // wiki   魔法塔楼 · 塔尖旋转魔法球
-    {kind:'lighthouse',labelY:3.85, feature:'beam'},    // video  灯塔 · 旋转探照光束
-    {kind:'windmill',  labelY:2.70, feature:'blades'},  // ppt    风车屋 · 旋转叶片
-    {kind:'lab',       labelY:2.55, feature:'shield'},  // test   实验室 · 防护罩 + 浮核
+    {kind:'tower',     labelY:4.55, feature:'orb'},     // wiki   魔法塔楼 · 塔尖旋转魔法球
+    {kind:'lighthouse',labelY:4.25, feature:'beam'},    // video  灯塔 · 旋转探照光束
+    {kind:'windmill',  labelY:2.75, feature:'blades'},  // ppt    风车屋 · 旋转叶片
+    {kind:'lab',       labelY:2.45, feature:'shield'},  // test   实验室 · 防护罩 + 浮核
     {kind:'dome',      labelY:2.35, feature:'floats'},  // canvas 画室 · 漂浮彩色方块
-    {kind:'house',     labelY:3.05, feature:'block'},   // game   像素屋 · 旋转方块
-    {kind:'array',     labelY:3.90, feature:'scan'}     // matrix 阵列大厦 · 数据扫描
+    {kind:'house',     labelY:3.10, feature:'block'},   // game   像素屋 · 旋转方块
+    {kind:'array',     labelY:3.75, feature:'scan'}     // matrix 阵列大厦 · 数据扫描
   ];
-  var SPACING=2.4;
+  var SPACING=2.2,camZ=11;
   var renderer,scene,camera,root,stars,blds=[],meshes=[];
   var raycaster=new THREE.Raycaster(),nDC={x:0,y:0},hovered=null;
   var tmpV=new THREE.Vector3(),swayT=0;
@@ -1176,12 +1176,16 @@ document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el
   stage.appendChild(renderer.domElement);
 
   scene=new THREE.Scene();
-  scene.add(new THREE.AmbientLight(0x8fa3c4,.6));
-  var sunLight=new THREE.PointLight(0x2ee6c8,1.7,40);
-  scene.add(sunLight);
-  var keyLight=new THREE.DirectionalLight(0xffffff,.5);
-  keyLight.position.set(6,10,6);
+  scene.add(new THREE.AmbientLight(0x9fb8dd,.8));
+  var keyLight=new THREE.DirectionalLight(0xffffff,.9);
+  keyLight.position.set(6,11,8);
   scene.add(keyLight);
+  var rimLight=new THREE.DirectionalLight(0x2ee6c8,.4);
+  rimLight.position.set(-8,5,-6);
+  scene.add(rimLight);
+  var topLight=new THREE.PointLight(0x8fd8ff,.9,34);
+  topLight.position.set(0,8,2);
+  scene.add(topLight);
 
   camera=new THREE.PerspectiveCamera(45,1,.1,100);
   camera.position.set(0,4.0,11);
@@ -1241,79 +1245,172 @@ document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el
     s.scale.set(r,r,1);return s;
   }
 
+  // ── 建筑立面纹理：{map 墙面+窗框, emi 窗户发光层} ──
+  function facadeTexture(hex,style){
+    var c=document.createElement('canvas');c.width=c.height=256;
+    var g=c.getContext('2d');
+    var wall=shade(hex,.88),dark=shade(hex,.5),darker=shade(hex,.32);
+    var wc='rgba(190,235,255,.95)',wcD='rgba(150,190,215,.5)';
+    var wins=[];
+    g.fillStyle=wall;g.fillRect(0,0,256,256);
+    g.strokeStyle=darker;g.lineWidth=4;
+    if(style==='tower'){ // 竖向面板 + 两列窄窗
+      for(var x=64;x<256;x+=64){g.beginPath();g.moveTo(x,0);g.lineTo(x,256);g.stroke();}
+      for(var y=24;y<256;y+=56){g.fillStyle=wcD;g.fillRect(104,y-16,20,34);g.fillRect(132,y-16,20,34);
+        g.fillStyle=wc;g.fillRect(110,y-10,8,22);g.fillRect(138,y-10,8,22);}
+    }else if(style==='lighthouse'){ // 横纹 + 舷窗
+      for(var y=16;y<256;y+=48){g.fillStyle=dark;g.fillRect(0,y,256,12);}
+      for(var y2=26;y2<256;y2+=48){g.fillStyle=wcD;g.fillRect(44,y2-11,30,22);g.fillRect(182,y2-11,30,22);
+        g.fillStyle=wc;g.fillRect(51,y2-6,10,12);g.fillRect(189,y2-6,10,12);}
+    }else if(style==='grid'){ // 网格窗
+      for(var y3=26;y3<256;y3+=62){for(var x3=28;x3<256;x3+=58){g.fillStyle=wcD;g.fillRect(x3-20,y3-22,40,44);
+        g.fillStyle=wc;g.fillRect(x3-13,y3-15,18,30);}}
+    }else if(style==='lab'){ // 长条玻璃
+      for(var y4=34;y4<256;y4+=44){g.fillStyle='rgba(160,215,255,.45)';g.fillRect(16,y4-14,224,28);
+        g.strokeStyle='rgba(255,255,255,.3)';g.lineWidth=2;g.beginPath();g.moveTo(16,y4);g.lineTo(240,y4);g.stroke();}
+      for(var x4=64;x4<256;x4+=64){g.strokeStyle=dark;g.lineWidth=4;g.beginPath();g.moveTo(x4,0);g.lineTo(x4,256);g.stroke();}
+    }else if(style==='pixel'){ // 像素窗
+      for(var y5=16;y5<256;y5+=46){for(var x5=16;x5<256;x5+=46){g.fillStyle=wcD;g.fillRect(x5-15,y5-15,30,30);
+        g.fillStyle=wc;g.fillRect(x5-9,y5-9,18,18);}}
+    }else if(style==='bars'){ // 垂直霓虹条
+      for(var x6=36;x6<256;x6+=58){
+        var gr=g.createLinearGradient(0,256,0,0);
+        gr.addColorStop(0,'rgba(255,214,120,.12)');gr.addColorStop(1,'rgba(255,214,120,.9)');
+        g.fillStyle=gr;g.fillRect(x6-13,0,26,256);
+      }
+      for(var y6=52;y6<256;y6+=52){g.strokeStyle=darker;g.lineWidth=5;
+        g.beginPath();g.moveTo(0,y6);g.lineTo(256,y6);g.stroke();}
+    }else{ // glass：横条大玻璃
+      for(var y7=26;y7<256;y7+=46){g.fillStyle='rgba(160,215,255,.4)';g.fillRect(12,y7-17,232,34);
+        g.strokeStyle='rgba(255,255,255,.3)';g.lineWidth=2;g.beginPath();g.moveTo(12,y7);g.lineTo(244,y7);g.stroke();}
+      for(var x7=48;x7<256;x7+=64){g.strokeStyle=dark;g.lineWidth=4;g.beginPath();g.moveTo(x7,0);g.lineTo(x7,256);g.stroke();}
+    }
+    // 窗户发光层（墙黑窗亮）
+    var c2=document.createElement('canvas');c2.width=c2.height=256;
+    var g2=c2.getContext('2d');
+    g2.fillStyle='#000';g2.fillRect(0,0,256,256);
+    g2.fillStyle='#fff';
+    var re=/rgba\(([\d.]+),/g;
+    // 简单方式：重新记录窗口矩形
+    g2.fillStyle=wc;
+    if(style==='tower'){for(var y=24;y<256;y+=56){g2.fillRect(110,y-10,8,22);g2.fillRect(138,y-10,8,22);}}
+    else if(style==='lighthouse'){for(var y=26;y<256;y+=48){g2.fillRect(51,y-6,10,12);g2.fillRect(189,y-6,10,12);}}
+    else if(style==='grid'){for(var y=26;y<256;y+=62){for(var x=28;x<256;x+=58){g2.fillRect(x-13,y-15,18,30);}}}
+    else if(style==='lab'){for(var y=34;y<256;y+=44){g2.fillRect(16,y-14,224,28);}}
+    else if(style==='pixel'){for(var y=16;y<256;y+=46){for(var x=16;x<256;x+=46){g2.fillRect(x-9,y-9,18,18);}}}
+    else if(style==='bars'){for(var x=36;x<256;x+=58){g2.fillRect(x-13,0,26,256);}}
+    else{for(var y=26;y<256;y+=46){g2.fillRect(12,y-17,232,34);}}
+    return {map:new THREE.CanvasTexture(c),emi:new THREE.CanvasTexture(c2)};
+  }
+  function facMat(col,ft,ei){
+    return new THREE.MeshStandardMaterial({
+      map:ft.map,emissive:0xffffff,emissiveMap:ft.emi,
+      emissiveIntensity:ei===undefined?.6:ei,metalness:.2,roughness:.55
+    });
+  }
+  function darkMat(hex){return new THREE.MeshStandardMaterial({color:shade(hex,.32),roughness:.7,metalness:.2});}
+
   // ── 7 座建筑（一字排开 · 各具特色） ──
   tools.forEach(function(t,i){
     var col=new THREE.Color(t.acc),arch=ARCH[i];
     var grp=new THREE.Group();
     var body=new THREE.Group();
     grp.add(body);
-    var x=(i-(N-1)/2)*SPACING,homeZ=Math.sin((i-(N-1)/2)*.32)*.9;
+    var x=(i-(N-1)/2)*SPACING;
+    // 城区式前后错落：中间主楼后置、两侧建筑前伸环抱，形成纵深街区
+    var homeZ=-Math.cos((i-(N-1)/2)*.5)*1.15;
     grp.position.set(x,0,homeZ);
     var anim={phase:Math.random()*6.28};
-    var k,o;
+    var k,o,dark=darkMat(t.acc);
     if(arch.kind==='tower'){ // wiki：魔法塔楼
-      var shaft=cy(.5,.62,2.5,stdMat(col),12);shaft.position.y=1.25;body.add(shaft);
-      var spire=co(.74,.95,stdMat(col),12);spire.position.y=2.95;body.add(spire);
-      var orb=sp(.18,glowMat(col));orb.position.y=3.62;body.add(orb);
-      var orbH=glowSprite(colStr(t.acc),5);orbH.position.y=3.62;body.add(orbH);
-      for(k=0;k<4;k++){o=bx(.16,.36,.08);o.material=glowMat(col);
-        o.position.set(Math.cos(k*1.57)*.52,1.35,Math.sin(k*1.57)*.52);body.add(o);}
-      var orbs=[];for(k=0;k<3;k++){o=glowSprite(colStr(t.acc),.9);o.position.y=3.1;body.add(o);orbs.push(o);}
+      var plinth=cy(.8,.92,.28,dark,14);plinth.position.y=.14;body.add(plinth);
+      var ftT=facadeTexture(t.acc,'tower');
+      var shaft=bx(.92,2.35,.92,facMat(col,ftT));
+      shaft.position.y=1.46;body.add(shaft);
+      var eave=bx(1.14,.16,1.14,dark);eave.position.y=2.72;body.add(eave);
+      var spire=co(.72,.9,facMat(col,ftT,.35),12);
+      spire.position.y=3.25;body.add(spire);
+      var orb=sp(.15,glowMat(col));orb.position.y=3.82;body.add(orb);
+      var orbH=glowSprite(colStr(t.acc),4.6);orbH.position.y=3.82;body.add(orbH);
+      var door=bx(.3,.5,.06);door.material=glowMat(col);door.position.set(0,.25,.48);body.add(door);
+      var orbs=[];for(k=0;k<3;k++){o=glowSprite(colStr(t.acc),.85);o.position.y=3.25;body.add(o);orbs.push(o);}
       anim.orb=orb;anim.orbH=orbH;anim.orbs=orbs;
     }else if(arch.kind==='lighthouse'){ // video：灯塔
-      var shaft2=cy(.42,.56,2.7,stdMat(col),12);shaft2.position.y=1.35;body.add(shaft2);
-      var cab=bx(.86,.72,.86);cab.material=stdMat(col);cab.position.y=3.05;body.add(cab);
-      var lens=cy(.18,.18,.18,glowMat(col),14);lens.rotation.x=Math.PI/2;lens.position.set(0,3.05,.48);body.add(lens);
-      var beamG=new THREE.Group();beamG.position.y=3.35;
-      var b1=bx(.08,.12,1.9);b1.material=glowMat(col);beamG.add(b1);
-      var b2=bx(1.9,.12,.08);b2.material=glowMat(col);beamG.add(b2);
+      var pl2=cy(.62,.74,.26,dark,12);pl2.position.y=.13;body.add(pl2);
+      var shaft2=cy(.38,.5,2.5,facMat(col,facadeTexture(t.acc,'lighthouse'),.5),14);
+      shaft2.position.y=1.51;body.add(shaft2);
+      var bal=bx(.92,.14,.92,dark);bal.position.y=2.83;body.add(bal);
+      var lampG=cy(.42,.42,.6,glowMat(col),12);lampG.position.y=3.2;body.add(lampG);
+      var hat=co(.5,.5,dark,10);hat.position.y=3.75;body.add(hat);
+      var beamG=new THREE.Group();beamG.position.y=3.55;
+      var b1=bx(.06,.14,1.8);b1.material=glowMat(col);beamG.add(b1);
+      var b2=bx(1.8,.14,.06);b2.material=glowMat(col);beamG.add(b2);
       body.add(beamG);anim.beam=beamG;
     }else if(arch.kind==='windmill'){ // ppt：风车屋
-      var hut=bx(1.5,1.4,1.5);hut.material=stdMat(col);hut.position.y=.7;body.add(hut);
-      var roof=co(1.2,.95,stdMat(col),8);roof.position.y=1.9;body.add(roof);
-      var chim=cy(.18,.22,.55,stdMat(col),8);chim.position.set(.52,2.25,.32);body.add(chim);
-      var blades=new THREE.Group();blades.position.set(.92,1.25,0);
-      for(k=0;k<4;k++){var bl=bx(.14,1.55,.06);bl.material=stdMat(col);bl.rotation.z=k*Math.PI/2;bl.position.y=.78;blades.add(bl);}
-      var hub=cy(.1,.1,.14,glowMat(col),10);hub.rotation.x=Math.PI/2;blades.add(hub);
+      var pl3=bx(1.9,.3,1.8,dark);pl3.position.y=.15;body.add(pl3);
+      var hut=bx(1.6,1.45,1.55,facMat(col,facadeTexture(t.acc,'grid')));
+      hut.position.y=1.03;body.add(hut);
+      var roof=co(1.28,.95,facMat(col,facadeTexture(t.acc,'grid'),.3),8);
+      roof.position.y=2.23;body.add(roof);
+      var chim=cy(.16,.2,.55,dark,8);chim.position.set(.5,2.6,.4);body.add(chim);
+      var dw=bx(.34,.62,.06);dw.material=glowMat(col);dw.position.set(0,.31,.8);body.add(dw);
+      var bladeTex=facadeTexture(t.acc,'pixel');
+      var blades=new THREE.Group();blades.position.set(1.0,1.35,0);
+      for(k=0;k<4;k++){var bl=bx(.1,1.6,.05);bl.material=facMat(col,bladeTex,.5);
+        bl.rotation.z=k*Math.PI/2;bl.position.y=.8;blades.add(bl);}
+      var hub=cy(.09,.09,.12,glowMat(col),10);hub.rotation.x=Math.PI/2;blades.add(hub);
       body.add(blades);anim.blades=blades;
     }else if(arch.kind==='lab'){ // test：实验室
-      var pad=cy(.85,1.0,.55,stdMat(col),10);pad.position.y=.28;body.add(pad);
-      var dome=sp(.95,stdMat(col),24);dome.position.y=.82;body.add(dome);
-      var core=sp(.4,glowMat(col));core.position.y=.85;body.add(core);
-      var shield=new THREE.Mesh(new THREE.SphereGeometry(1.22,22,12),
+      var pad2=bx(1.7,1.05,1.7,facMat(col,facadeTexture(t.acc,'lab')));
+      pad2.position.y=.53;body.add(pad2);
+      var collar=bx(1.25,.24,1.25,dark);collar.position.y=1.18;body.add(collar);
+      var dome=sp(.68,facMat(col,facadeTexture(t.acc,'glass'),.8),24);
+      dome.position.y=1.35;body.add(dome);
+      var core=sp(.28,glowMat(col));core.position.y=1.38;body.add(core);
+      var shield=new THREE.Mesh(new THREE.SphereGeometry(1.0,22,12),
         new THREE.MeshBasicMaterial({color:col,wireframe:true,transparent:true,opacity:.32}));
-      shield.position.y=.78;body.add(shield);
-      var lamp=bx(.16,.16,.16);lamp.material=glowMat(col);lamp.position.y=1.95;body.add(lamp);
+      shield.position.y=1.3;body.add(shield);
+      var lamp=bx(.15,.15,.15);lamp.material=glowMat(col);lamp.position.y=2.0;body.add(lamp);
       anim.core=core;anim.shield=shield;anim.lamp=lamp;
     }else if(arch.kind==='dome'){ // canvas：画室
-      var base=bx(1.5,.5,1.5);base.material=stdMat(col);base.position.y=.25;body.add(base);
-      var archD=sp(.95,stdMat(col),24);archD.position.y=1.05;body.add(archD);
+      var base2=bx(1.55,.55,1.55,facMat(col,facadeTexture(t.acc,'glass'),.5));
+      base2.position.y=.28;body.add(base2);
+      var archD=sp(.8,facMat(col,facadeTexture(t.acc,'glass'),.7),24);
+      archD.position.y=1.0;body.add(archD);
+      var wing=bx(.85,1.35,.85,facMat(col,facadeTexture(t.acc,'lab'),.4));
+      wing.position.set(.92,.68,0);body.add(wing);
+      var wing2=bx(.7,.85,.7,facMat(col,facadeTexture(t.acc,'lab'),.4));
+      wing2.position.set(-1.0,.43,0);body.add(wing2);
       var floats=[];
-      for(k=0;k<8;k++){o=bx(.22,.22,.22);o.material=stdMat(new THREE.Color(tools[k%N].acc));
-        o.position.set(Math.cos(k*.785)*1.55,1.1+Math.sin(k*1.3)*.4,Math.sin(k*.785)*1.55);
+      for(k=0;k<8;k++){o=bx(.2,.2,.2);o.material=stdMat(new THREE.Color(tools[k%N].acc));
+        o.position.set(Math.cos(k*.785)*1.5,1.0+Math.sin(k*1.3)*.42,Math.sin(k*.785)*1.5);
         body.add(o);floats.push(o);}
       anim.floats=floats;
     }else if(arch.kind==='house'){ // game：像素屋
-      var hut2=bx(1.4,1.2,1.4);hut2.material=stdMat(col);hut2.position.y=.6;body.add(hut2);
-      var r2=bx(1.7,.35,1.7);r2.material=stdMat(new THREE.Color(shade(colStr(t.acc),.7)));r2.position.y=1.28;body.add(r2);
-      var r3=bx(1.2,.3,1.2);r3.material=stdMat(col);r3.position.y=1.6;body.add(r3);
-      var r4=bx(.75,.28,.75);r4.material=stdMat(col);r4.position.y=1.9;body.add(r4);
-      var win2=bx(.3,.3,.1);win2.material=glowMat(col);win2.position.set(0,.72,.72);body.add(win2);
-      var block=bx(.34,.34,.34,glowMat(col));block.position.y=2.42;body.add(block);
+      var base3=bx(1.85,.32,1.75,dark);base3.position.y=.16;body.add(base3);
+      var hut2=bx(1.5,1.35,1.5,facMat(col,facadeTexture(t.acc,'pixel')));
+      hut2.position.y=1.0;body.add(hut2);
+      var r2=bx(1.75,.32,1.75,dark);r2.position.y=1.84;body.add(r2);
+      var r3=bx(1.25,.3,1.25,facMat(col,facadeTexture(t.acc,'pixel'),.4));r3.position.y=2.15;body.add(r3);
+      var r4=bx(.8,.3,.8,facMat(col,facadeTexture(t.acc,'pixel'),.4));r4.position.y=2.45;body.add(r4);
+      var win2=bx(.34,.34,.08);win2.material=glowMat(col);win2.position.set(0,1.0,.78);body.add(win2);
+      var block=bx(.32,.32,.32,glowMat(col));block.position.y=2.85;body.add(block);
       anim.block=block;
     }else if(arch.kind==='array'){ // matrix：阵列大厦
-      var layerMats=[];for(k=0;k<5;k++)layerMats.push(stdMat(col));
+      var base4=bx(1.8,.4,1.7,dark);base4.position.y=.2;body.add(base4);
+      var tower=bx(1.45,2.55,1.45,facMat(col,facadeTexture(t.acc,'bars')));
+      tower.position.y=1.68;body.add(tower);
+      var ledge=bx(1.6,.16,1.6,dark);ledge.position.y=3.04;body.add(ledge);
+      var ant=cy(.05,.05,.85,dark,6);ant.position.y=3.55;body.add(ant);
+      var tip=bx(.18,.18,.18);tip.material=glowMat(col);tip.position.y=4.05;body.add(tip);
       var cells=[];
-      for(var cx=-1;cx<=1;cx++)for(var cz=-1;cz<=1;cz++)for(var cyy=0;cyy<5;cyy++){
-        o=bx(.4,.4,.4);o.material=layerMats[cyy];
-        o.position.set(cx*.5,.35+cyy*.5,cz*.5);body.add(o);cells.push({m:o,ly:cyy});
-      }
-      var ant=cy(.045,.045,.8,stdMat(col),6);ant.position.y=2.85;body.add(ant);
-      var tip=bx(.16,.16,.16);tip.material=glowMat(col);tip.position.y=3.32;body.add(tip);
+      for(k=0;k<6;k++){o=bx(.22,.22,.22);o.material=glowMat(col);
+        o.position.set(Math.cos(k*1.047)*1.25,1.6+Math.sin(k*1.8)*.55,Math.sin(k*1.047)*1.25);
+        body.add(o);cells.push(o);}
       anim.cells=cells;anim.tip=tip;
     }
     // 脚下光晕 + 头顶标签
-    var floor=glowSprite(colStr(t.acc),3.6);floor.position.y=.08;floor.scale.set(3.4,1.15,1);grp.add(floor);
+    var floor=glowSprite(colStr(t.acc),3.6);floor.position.y=.1;floor.scale.set(3.2,1.1,1);grp.add(floor);
     var label=new THREE.Sprite(new THREE.SpriteMaterial({
       map:labelTexture('magic-'+t.short,t.acc),transparent:true,depthWrite:false,opacity:.42
     }));
@@ -1352,9 +1449,15 @@ document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el
         an.block.rotation.y+=.05;an.block.rotation.x+=.03;
         an.block.position.y=2.42+Math.sin(an.phase)*.14;
       }
-      if(an.cells){ // 阵列大厦：数据扫描亮层
-        var ly=Math.floor(an.phase*2)%5;
-        an.cells.forEach(function(c){c.m.material.emissiveIntensity=c.ly===ly?1.25:.15;});
+      if(an.cells){ // 阵列大厦：数据立方环绕扫描
+        var a=an.phase*.55;
+        an.cells.forEach(function(c,k){
+          var ang=a+k*1.047;
+          c.position.x=Math.cos(ang)*1.25;
+          c.position.z=Math.sin(ang)*1.25;
+          c.position.y=1.6+Math.sin(ang*1.4+k*1.3)*.55;
+          c.rotation.y+=.05;c.rotation.x+=.03;
+        });
         an.tip.material.emissiveIntensity=1.1+Math.sin(an.phase)*.7;
       }
       // 聚焦缓动 + hover 放大
@@ -1371,7 +1474,9 @@ document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el
     renderer.setSize(w,h);
     camera.aspect=w/h;
     camera.updateProjectionMatrix();
-    root.scale.setScalar(Math.min(1.05,Math.max(.42,w/1100)));
+    // 按视口宽高比适配取景：窄屏回缩放全，宽屏放大填满（内容半宽约 8.2）
+    var fit=Math.tan(22.5*DEG)*camZ*(w/h)/8.2;
+    root.scale.setScalar(Math.min(1.05,Math.max(.3,fit)));
   }
   addEventListener('resize',resize);
   resize();
@@ -1437,6 +1542,20 @@ document.querySelectorAll('.page.active .rv').forEach(function(el){io.observe(el
       var v=new THREE.Vector3().copy(blds[i].grp.position).applyMatrix4(root.matrixWorld).project(camera);
       var r=renderer.domElement.getBoundingClientRect();
       return {x:r.left+(v.x+1)/2*r.width,y:r.top+(1-v.y)/2*r.height};
+    },
+    edgeX:function(i,dx){
+      var b=blds[i];
+      var v=new THREE.Vector3(b.grp.position.x+dx,0,b.grp.position.z);
+      v.applyMatrix4(root.matrixWorld).project(camera);
+      var r=renderer.domElement.getBoundingClientRect();
+      return r.left+(v.x+1)/2*r.width;
+    },
+    topY:function(i){
+      var b=blds[i];
+      var v=new THREE.Vector3(b.grp.position.x,ARCH[i].labelY+.4,b.grp.position.z);
+      v.applyMatrix4(root.matrixWorld).project(camera);
+      var r=renderer.domElement.getBoundingClientRect();
+      return r.top+(1-v.y)/2*r.height;
     },
     zPos:function(i){return blds[i].grp.position.z;},
     homeZ:function(i){return blds[i].homeZ;},
