@@ -36,8 +36,8 @@
 ## 简介
 
 **magic-cli** 是免费的命令行工具箱，由一系列独立的命令行工具组成：
-每个 `magic-*` 解决一类具体需求，通过 npm 全局安装、以二进制形式分发，
-不依赖用户手动配置 Python 环境，装完即可在终端使用。
+每个 `magic-*` 解决一类具体需求，通过 npm 全局安装、装完即用，
+不依赖用户手动配置 Python 环境。
 
 ## 系列一览
 
@@ -57,7 +57,7 @@
 
 网页内容剪藏工具 CLI —— 剪藏网页 / 搜索 B 站 + 公众号 / 队列管理。
 
-以**二进制形式**（`.so` / `.pyd`）发布，用户安装后看不到任何 Python 源码。
+`npm install -g @magicstock/magic-wiki` 一键安装、装完即用，无需手动配置 Python 环境，开箱即可上手。
 
 ### 特色功能
 
@@ -258,7 +258,7 @@ magic-wiki config unset raw_dir   # 删除配置项
 
 中文网文 / 短剧剧本 / 视频分镜一体化内容生产 CLI —— 从大纲到分镜的完整内容生产流水线。
 
-以**单一二进制**（Go 编译，Cobra 命令树）分发，`npm install` 装完即用，无需 Go / Node 环境。
+`npm install` 装完即用，无需安装 Go / Node 等任何运行环境。
 
 ### 特色功能
 
@@ -294,7 +294,7 @@ npm install -g @magicstock/magic-cli
 
 支持平台：macOS（Apple Silicon）、Windows x64。
 
-二进制（`bin/magic-cli` / `bin/magic-cli.exe`）直接打进 npm 包，安装即用，**无需 GitHub token、无需下载**；GitHub Releases 下载仅作为包内二进制缺失时的兜底（私有仓库需 `GITHUB_TOKEN`，含 sha256 校验）。
+npm 安装即用，**无需 GitHub token、无需额外下载**；GitHub Releases 下载仅作为安装包缺失时的兜底（私有仓库需 `GITHUB_TOKEN`，含 sha256 校验）。
 
 > 若安装后 `magic-cli` 提示 binary not found，说明 postinstall 被 npm `allow-scripts` 拦截，执行：
 > ```bash
