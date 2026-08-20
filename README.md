@@ -2,6 +2,8 @@
 
 免费命令行工具箱（magic 系列 CLI）—— 一个命令家族，各司其职，装完即用。
 
+> 🌐 在线介绍页：https://javacn.github.io/magic-cli/
+
 ---
 
 ## 🤖 Agent 一键安装提示词
